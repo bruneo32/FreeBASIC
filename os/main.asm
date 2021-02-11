@@ -43,7 +43,7 @@ BasicReorder:
 	;incbin "basic/reorder.bin"
 	ret
 BasicInterpret:
-	;incbin "basic/core.bin"
+	incbin "basic/core.bin"
 	ret
 
 ; ----------------------------------------
