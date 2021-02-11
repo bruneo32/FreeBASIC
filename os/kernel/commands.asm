@@ -236,6 +236,32 @@ cmd_PRE:
 	.cmdEnd:
 	ret
 
+str_cmd_RUN:
+	db 'RUN',0
+str_cmdh_RUN:
+	db ' (?) Ejecuta el programa en memoria',0
+cmd_RUN:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_RUN
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	.comm:
+	
+	mov si, 0x9e00
+	call BasicInterpret
+	
+	xor bx, bx
+	.cmdEnd:
+	ret
+
 str_cmd_VER:
 	db 'VER',0
 str_cmdh_VER:

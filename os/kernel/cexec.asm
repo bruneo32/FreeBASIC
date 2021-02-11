@@ -55,6 +55,15 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	RUN
+	push si
+	mov di, str_cmd_RUN
+	call iStringCompareSpace
+	call cmd_RUN
+	pop si
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	VER
 	push si
 	mov di, str_cmd_VER
