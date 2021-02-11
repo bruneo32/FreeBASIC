@@ -45,15 +45,42 @@ PrintStringLn:
 SetCursorPos:
 	; DH: Row
 	; DL: Column
+	pusha
+	
 	mov ax, 0x0200
 	xor bx, bx ; Page
 	int 10h
 	; Registers destroyed:      AX, SP, BP, SI, DI
+	
+	popa
 	ret
 GetCursorPos:
+	pusha
+	
 	mov ax, 0x0300
 	xor bx, bx ; Page
 	int 10h
 	; Registers destroyed:      AX, SP, BP, SI, DI
 	; Return DH:ROW, DL:COLUMN
+	mov [_CursorRow], dh
+	mov [_CursorCol], dl
+	
+	popa
 	ret
+MovCursorRel:
+	; BH: Row more
+	; BL: Column more
+	push dx
+	
+	call GetCursorPos
+	mov dh, [_CursorRow]
+	mov dl, [_CursorCol]
+	add dh, bh
+	add dl, bl
+	call SetCursorPos
+	
+	pop dx
+	ret
+
+_CursorRow: db 0
+_CursorCol: db 0

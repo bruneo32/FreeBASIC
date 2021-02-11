@@ -34,6 +34,80 @@ _sys_get_time:
 	
 	.end:
 	ret
+_sys_get_date:
+	mov ah, 0x04
+	int 1ah
+	jc .end
+	; CH         Century (19 or 20) (BCD)
+	; CL         Year (BCD)
+	; DH         Month (BCD)
+	; DL         Day (BCD)
+	push bx
+	
+	mov di, _sys_date
+	
+	; YEAR
+	xor bx, bx
+	mov bl, ch ; YEAR Upper
+	shl bx, 4
+	shr bl, 4
+	add bh, '0' ; Convertir a ASCII
+	add bl, '0' ; Convertir a ASCII
+	
+	mov [di], bh
+	inc di
+	mov [di], bl
+	inc di
+	
+	; YEAR 2
+	xor bx, bx
+	mov bl, cl ; YEAR Lower
+	shl bx, 4
+	shr bl, 4
+	add bh, '0' ; Convertir a ASCII
+	add bl, '0' ; Convertir a ASCII
+	
+	mov [di], bh
+	inc di
+	mov [di], bl
+	inc di
+	
+	; Ignorar una
+	inc di
+	
+	; MES
+	xor bx, bx
+	mov bl, dh ; MONTH
+	shl bx, 4
+	shr bl, 4
+	add bh, '0' ; Convertir a ASCII
+	add bl, '0' ; Convertir a ASCII
+	
+	mov [di], bh
+	inc di
+	mov [di], bl
+	inc di
+	
+	; Ignorar una
+	inc di
+	
+	; DIA
+	xor bx, bx
+	mov bl, dl ; DAY
+	shl bx, 4
+	shr bl, 4
+	add bh, '0' ; Convertir a ASCII
+	add bl, '0' ; Convertir a ASCII
+	
+	mov [di], bh
+	inc di
+	mov [di], bl
+	inc di
+	
+	
+	pop bx
+	.end:
+	ret
 
 _sys_wait:
 	; MICROSEGUNDOS
@@ -61,4 +135,7 @@ _str_nocom:
 	db '[Error] Comando desconocido o invalido.',0
 _sys_time:
 	db '00:00'
+	db 0
+_sys_date:
+	db '0000-00-00'
 	db 0

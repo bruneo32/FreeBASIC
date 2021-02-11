@@ -19,6 +19,15 @@ _con_exec:
 	jz .end
 	
 	
+	;	CDT
+	push si
+	mov di, str_cmd_CDT
+	call iStringCompareSpace
+	call cmd_CDT
+	pop si
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	CLS
 	push si
 	mov di, str_cmd_CLS

@@ -29,11 +29,12 @@ hlt
 times 256-($-$$) db 0
 
 ; 0x7d00
-KIV:
+KIV: ; KIV, Kernel Interrupt Vector
 	dw PrintStringLn
 	
-	times 32-($-KIV) db 0 ; KIV, Kernel Interrupt Vector
+	times 32-($-KIV) db 0
 	db 0x5a,0x7a ; KIV End Signature
+
 BasicProgramCounter: dw BasicSpace
 
 %include "templates/appleii.asm"
@@ -44,7 +45,6 @@ BasicReorder:
 	ret
 BasicInterpret:
 	incbin "basic/core.bin"
-	ret
 
 ; ----------------------------------------
 times 8192 - ($-$$) db 0

@@ -5,7 +5,7 @@ str_cmds:
 	db ' > LIST, LOAD, NEW, RUN, SAVE',13
 	db 13
 	db 'Comandos del sistema:',13
-	db ' > CLS, COL, HELP, OFF, PRE, VER',13
+	db ' > CDT, CLS, COL, HELP, OFF, PRE, VER',13
 	db 13
 	db 'Comandos sobre archivos:',13
 	db ' > CAT, CHD, DEL, DELD, MKD, REN, REND, RTX, WTX',13
@@ -61,6 +61,47 @@ cmd_CAT:
 	call PrintLn
 	mov si, _str_cc_Unk
 	call PrintStringLn
+	
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_CDT:
+	db 'CDT',0
+str_cmdh_CDT:
+	db ' (?) Watch the Current Date and Time',0
+cmd_CDT:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_CDT
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	.comm:
+	
+	call PrintLn
+	
+	mov bx, 0x0003
+	call MovCursorRel
+	
+	call _sys_get_time
+	mov si, _sys_time
+	call PrintString
+	
+	mov bx, 0x0003
+	call MovCursorRel
+	
+	call _sys_get_date
+	mov si, _sys_date
+	call PrintString
+	
+	call PrintLn
 	
 	xor bx, bx
 	.cmdEnd:
