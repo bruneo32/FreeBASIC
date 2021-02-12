@@ -3,6 +3,8 @@ _PrintLn			equ 0x7d02
 _PrintStringLn		equ 0x7d04
 _GetPromptString	equ 0x7d06
 _InputBuffer		equ 0x7d08 ; Return de GetPromptString
+__ensure			equ 0x7d0a ; Return BL=0(byte) if user hit ENTER, else BL=1
+__more				equ 0x7d0c ; Return BL=0(byte) if user hit ENTER, else BL=1
 
 global PrintString
 PrintString:
