@@ -40,6 +40,8 @@ KIV: ; KIV, Kernel Interrupt Vector
 	dw PrintStringLn
 	dw GetPromptString
 	dw _InputBuffer
+	dw __ensure
+	dw __more
 	
 	times 32-($-KIV) db 0
 	db 0x5a,0x7a ; KIV End Signature

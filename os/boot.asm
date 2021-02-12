@@ -1,6 +1,36 @@
 [org 0x7c00]
 [bits 16]
 
+; FAT12
+BPB:
+    jmp START
+    nop
+	
+	; FAT12
+	db 'FreeBAS '				; OEM, 8 bytes
+	dw 512						; bytes per sector
+	db 1						; sectors per cluster
+	dw 1						; reserved sector count
+	db 0						; number of FATs
+	dw 0						; root directory entries
+	dw 2880						; total sectors in drive
+	db 0xF0						; media byte
+	dw 0						; sectors per fat
+	dw 18						; sectors per track
+	dw 2						; number of heads
+	dd 0						; hidden sector count
+	dd 0						; number of sectors huge
+EBPB: ; -------------------------------------------------
+	db 0						; drive number
+	db 0						; reserved
+	db 0x29						; signature, maybe 0 or 29 or 28
+	dd 0						; volume ID
+	db 'NO LABEL   '			; volume label, 11 bytes
+	db 'BRFS    '				; file system type, 8 bytes
+
+; CODE
+START:
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Crear stack y demás cosas iniciales
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -98,6 +128,6 @@ db 0x55,0xaa
 ; ROOT
 ROOT:
 db 'hola.txt',0x1c,0x00,0x12 ; sector18
-db 'hola.txt',0x1d,0x00,0x12 ; sector18
+db 'FOLDER',0x1d,0x00,0x13 ; sector18
 
 times 512-($-ROOT) db 0

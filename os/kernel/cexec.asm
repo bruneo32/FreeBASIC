@@ -153,7 +153,6 @@ _bas_store:
 	ret
 
 TryCommandOrBas:
-	pusha
 	
 	; Verificar si es un numero hasta el SPACE
 	
@@ -190,7 +189,6 @@ TryCommandOrBas:
 	call _con_exec
 	
 	.end:
-	popa
 	ret
 
 _str_nocom:
