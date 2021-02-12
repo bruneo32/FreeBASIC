@@ -2,10 +2,14 @@
 Setlocal EnableDelayedExpansion
 echo.
 
-nasm os\boot.asm -f bin -o os\boot.bin
-nasm os\main.asm -f bin -o os\main.bin
-nasm os\root.asm -f bin -o os\root.bin
+cd os
 
-copy /b os\boot.bin + os\main.bin + os\root.bin bootloader.flp
+nasm boot.asm -f bin -o boot.bin
+nasm main.asm -f bin -o main.bin
+nasm root.asm -f bin -o root.bin
+
+cd ..
+
+copy /b os\boot.bin+os\main.bin+os\root.bin bootloader.flp
 
 pause
