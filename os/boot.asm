@@ -6,17 +6,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 PROGRAM_SPACE equ 0x7e00
 xor ax, ax
-xor eax, eax
 mov ds, ax
 mov es, ax
 mov fs, ax
 mov gs, ax
 
-mov bx, 0x7c00
+mov bx, 0x7a00 ; x7a00-x7c00 = BRFS-TMS
+mov ebx, 0x00007a00
 cli
-mov ss, bx
-mov sp, ax
-mov esp, eax
+mov ss, ax
+mov sp, bx
+mov esp, ebx
 sti
 
 mov [BOOT_DRIVE], dl
@@ -46,12 +46,15 @@ jc DiskError
 mov dh, SECTORS
 cmp dh, al ; Si no ha leido bien: Error
 jnz DiskError
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Saltar a la posición de memoria del OS
+; Le vamos a pasar el BOOT_DRIVE para
+; que pueda obtener los parametros
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+mov dl, [BOOT_DRIVE]
 jmp PROGRAM_SPACE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -94,7 +97,7 @@ db 0x55,0xaa
 
 ; ROOT
 ROOT:
-
 db 'hola.txt',0x1c,0x00,0x12 ; sector18
+db 'hola.txt',0x1d,0x00,0x12 ; sector18
 
 times 512-($-ROOT) db 0

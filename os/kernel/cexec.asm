@@ -3,6 +3,7 @@ _con_exec:
 	clc
 	
 	; No hay comando, truhan
+	mov si, _InputBuffer
 	cmp [si], byte 0
 	jz .end
 	
@@ -10,75 +11,83 @@ _con_exec:
 	; Cosas de comandos
 	
 	;	HELP
-	push si
+	mov si, _InputBuffer
 	mov di, str_cmd_HELP
 	call iStringCompareSpace
 	call cmd_HELP
-	pop si
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
 	
+	;	CAT
+	mov si, _InputBuffer
+	mov di, str_cmd_CAT
+	call iStringCompareSpace
+	call cmd_CAT
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	CDT
-	push si
+	mov si, _InputBuffer
 	mov di, str_cmd_CDT
 	call iStringCompareSpace
 	call cmd_CDT
-	pop si
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
 	;	CLS
-	push si
+	mov si, _InputBuffer
 	mov di, str_cmd_CLS
 	call iStringCompareSpace
 	call cmd_CLS
-	pop si
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
+	;	NEW
+	mov si, _InputBuffer
+	mov di, str_cmd_NEW
+	call iStringCompareSpace
+	call cmd_NEW
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
 	;	LIST
-	push si
+	mov si, _InputBuffer
 	mov di, str_cmd_LIST
 	call iStringCompareSpace
 	call cmd_LIST
-	pop si
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
 	;	OFF
-	push si
+	mov si, _InputBuffer
 	mov di, str_cmd_OFF
 	call iStringCompareSpace
 	call cmd_OFF
-	pop si
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
 	;	PRE
-	push si
+	mov si, _InputBuffer
 	mov di, str_cmd_PRE
 	call iStringCompareSpace
 	call cmd_PRE
-	pop si
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
 	;	RUN
-	push si
+	mov si, _InputBuffer
 	mov di, str_cmd_RUN
 	call iStringCompareSpace
 	call cmd_RUN
-	pop si
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
 	;	VER
-	push si
+	mov si, _InputBuffer
 	mov di, str_cmd_VER
 	call iStringCompareSpace
 	call cmd_VER
-	pop si
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
@@ -183,3 +192,6 @@ TryCommandOrBas:
 	.end:
 	popa
 	ret
+
+_str_nocom:
+	db '[Error] Unknown or invalid command.',0

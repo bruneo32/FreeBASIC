@@ -113,87 +113,8 @@ iStringCompareComma:
 	ret
 
 
-StrToHex:
-	; SI: STRING address
-	pusha
-	
-	mov di, STRHEX
-	.clear:
-		cmp di, STRHEX+8
-		ja .eclear
-		mov [di], byte 0
-		inc di
-		jmp .clear
-	.eclear:
-	xor ax, ax
-	xor dx, dx
-	mov di, STRHEX
-	.loop:
-		mov dl, [si]
-		xor ah, ah
-		cmp dl, ah
-		jz .exitLoop
-		
-		mov ax, STRHEX+8
-		cmp di, ax ; No más de 9 xd
-		ja .exitLoop
-		
-		mov ah, '0'
-		cmp dl, ah
-		jb .NOHEX
-		mov ah, '9'
-		cmp dl, ah
-		ja .letra
-		;	Numeros
-		sub dl, '0'
-		
-		mov [di], dl
-		
-		jmp .next
-		
-		.letra:
-		;	Letras
-		; paso 1: ignore case
-		mov ah, 'f'
-		cmp dl, ah
-		ja .NOHEX
-		mov ah, 'a'
-		cmp dl, ah
-		jb .letraMAYUS
-		; es minus
-		sub dl, 32
-		
-		.letraMAYUS:
-		; Verificar si es invalido
-		mov ah, 'A'
-		cmp dl, ah
-		jb .NOHEX
-		mov ah, 'F'
-		cmp dl, ah
-		ja .NOHEX
-		sub dl, 'A'
-		add dl, 10 ; A=10
-		
-		mov [di], dl
-		
-		; Siguiente
-		.next:
-		inc si
-		inc di
-		jmp .loop
-	
-	.NOHEX:
-	;ret
-	
-	.exitLoop:
-	popa
-	; Return HEX in STRHEX
-	ret
-
 ; vars
 IgnoreCase:
 	db 0
 _stopchar:
 	db 0
-STRHEX:
-	times 9 db 0 ; 9 digitos

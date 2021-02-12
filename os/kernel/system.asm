@@ -131,8 +131,6 @@ _sys_shutdown:
 	ret
 
 ; DATOS
-_str_nocom:
-	db '[Error] Comando desconocido o invalido.',0
 _sys_time:
 	db '00:00'
 	db 0
