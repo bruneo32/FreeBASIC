@@ -1,9 +1,12 @@
 // main.c: interpreter main
 
+extern void PrintString();
 extern void PrintStringLn();
 extern void PrintLn();
 
 void interpret() {
-	//PrintStringLn("laura es una puta :)");
-	PrintLn();
+	for (int i = 0; i < 10; i++) {
+		PrintStringLn("XD");
+	}
+	
 }
