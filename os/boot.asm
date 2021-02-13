@@ -6,7 +6,7 @@ BPB:
     jmp START
     nop
 	
-	; FAT12
+	; FAT12 for BRFS
 	db 'FreeBAS '				; OEM, 8 bytes
 	dw 512						; bytes per sector
 	db 1						; sectors per cluster
@@ -42,11 +42,11 @@ mov fs, ax
 mov gs, ax
 
 mov bx, 0x7a00 ; x7a00-x7c00 = BRFS-TMS
-mov ebx, 0x00007a00
+mov ebx, 0x00007a00 ; For x86_64 machines
 cli
 mov ss, ax
 mov sp, bx
-mov esp, ebx
+mov esp, ebx ; For x86_64 machines
 sti
 
 mov [BOOT_DRIVE], dl
@@ -85,7 +85,7 @@ jnz DiskError
 ; que pueda obtener los parametros
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 mov dl, [BOOT_DRIVE]
-jmp PROGRAM_SPACE
+jmp 0:PROGRAM_SPACE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Terminar cualquier ejecucion

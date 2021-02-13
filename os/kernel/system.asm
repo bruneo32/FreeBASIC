@@ -118,16 +118,21 @@ _sys_wait:
 	ret
 
 _sys_shutdown:
-	mov ax, 0x1000 ; Apagar
-	mov ax, ss
-	mov sp, 0xf000
-	mov ax, 0x5307
-	mov bx, 0x0001
-	mov cx, 0x0003
-	int 0x15
+	; APM
+    mov ax, 0x1000
+    mov ax, ss
+    mov sp, 0xf000
+    mov ax, 0x5307
+    mov bx, 0x0001
+    mov cx, 0x0003
+    int 0x15
+	
+	; ACPI (if APM didnt work)
+	; ???
 	
 	cli
 	hlt
+	.error:
 	ret
 
 ; DATOS

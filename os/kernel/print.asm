@@ -28,6 +28,7 @@ PrintString:
 		int 0x10
 		.print:
 		mov al, [si]
+		xor bx, bx
 		int 0x10
 		
 		.next:

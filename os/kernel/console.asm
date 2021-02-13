@@ -1,33 +1,23 @@
-ConsoleClearAdvanced:
+ConsoleClear:
 	;;; INPUT ;;;
-	; AL: VBE Video Mode
-	; BH: Color
-	; CH: Cursor Row
-	; CL: Cursor Col
+	; Color en [COLOR]
 	
-	push cx
-	
+	; Clear
 	xor ah, ah ; Set video mode
+	mov al, [VideoMode]
 	int 10h
 	
+	call _FillColor
+	
+	ret
+_FillColor:
+	
+	; Fill with color
 	mov ax, 0x0600 ; Clear screen
-	xor bl, bl ; Page
+	mov bh, [COLOR]
+	xor bl, bl
 	xor cx, cx
 	mov dx, 0xFFFF
 	int 10h
-	
-	pop cx
-	mov dx, cx
-	call SetCursorPos
-	
-	ret
-
-ConsoleClearSimple:
-	;;; INPUT ;;;
-	; Color en [COLOR]
-	mov al, 0x03
-	mov bh, [COLOR]
-	xor cx, cx
-	call ConsoleClearAdvanced
 	
 	ret

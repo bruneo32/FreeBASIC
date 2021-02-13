@@ -27,6 +27,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	CD
+	mov si, _InputBuffer
+	mov di, str_cmd_CD
+	call iStringCompareSpace
+	call cmd_CD
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	CDT
 	mov si, _InputBuffer
 	mov di, str_cmd_CDT
@@ -72,6 +80,14 @@ _con_exec:
 	mov di, str_cmd_PRE
 	call iStringCompareSpace
 	call cmd_PRE
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
+	;	RTX
+	mov si, _InputBuffer
+	mov di, str_cmd_RTX
+	call iStringCompareSpace
+	call cmd_RTX
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	

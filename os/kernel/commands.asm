@@ -8,7 +8,7 @@ str_cmds:
 	db ' > CDT, CLS, COL, HELP, OFF, PRE, VER',13
 	db 13
 	db 'Commands about filesystem:',13
-	db ' > CAT, CHD, DEL, DELD, MKD, REN, REND, RTX, WTX',13
+	db ' > CAT, CD, DEL, DELD, MD, REN, REND, RTX, WTX',13
 	
 	db 0
 	
@@ -42,7 +42,7 @@ cmd_HELP:
 str_cmd_CAT:
 	db 'CAT',0
 str_cmdh_CAT:
-	db ' (?) Display a list with all the items in the current directory..',0
+	db ' (?) Display a list with all the items in the current directory.',0
 cmd_CAT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -172,6 +172,55 @@ cmd_CAT:
 	call _BRFS_ReadSector
 	jmp .starti2
 	
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_CD:
+	db 'CD',0
+str_cmdh_CD:
+	db ' (?) Change the current system path. See: CAT.',0
+cmd_CD:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+3]
+	jnz .comm
+	mov si, str_cmdh_CD
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	.comm:
+	
+	mov bh, byte 0
+	cmp bh, [_InputBuffer+3]
+	jz .cmdEnd
+	mov bh, 13 ; .cmd files
+	cmp bh, [_InputBuffer+3]
+	jz .cmdEnd
+	
+	call _BRFS_ReadSectorCD
+	jc .cmdEnd
+	
+	; Buscar si existe
+	mov bl, 0x1d
+	mov si, _InputBuffer+3
+	call _BRFS_GetElementFromDir
+	jc .cmdEndB ; No existe
+	
+	mov [_CD], dh
+	mov [_CD+1], dl
+	
+	jmp .cmdEndG
+	
+	.cmdEndB:
+	mov si, _str_cc_unkPath
+	call PrintStringLn
+	jmp .cmdEnd
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -436,6 +485,140 @@ cmd_PRE:
 	.cmdEnd:
 	ret
 
+str_cmd_RTX:
+	db 'RTX',0
+str_cmdh_RTX:
+	db ' (?) Read a text file and print it on screen.',0
+cmd_RTX:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_RTX
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	; vars
+	._c:	dw 0
+	
+	.comm:
+	
+	mov bh, byte 0
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEnd
+	mov bh, 13 ; .cmd files
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEnd
+	
+	call _BRFS_ReadSectorCD
+	jc .cmdEndB
+	
+	; Buscar si existe
+	mov bl, 0x1c ; Fichero
+	mov si, _InputBuffer+4
+	call _BRFS_GetElementFromDir
+	jc .cmdEndB ; No existe
+	; Adress in DX
+	mov [._c], dh
+	mov [._c+1], dl
+	
+	mov bh, dh
+	mov bl, dl
+	call _BRFS_ReadSector
+	jc .cmdEndB
+	
+	.starti2:
+	call PrintLn
+	mov si, _BRFS_TMS_
+	.loop:
+		cmp si, _BRFS_TMS_+510
+		jz .exitLoop
+		
+		; Ignorar hasta encontrar el siguiente
+		mov al, [si]
+		cmp al, 13 ; ENTER - CR
+		jnz .esc
+		call PrintLn
+		jmp .next
+		
+		.esc:
+		cmp al, 32 ; SPACE
+		jb .next
+		
+		mov ah, 0x0e
+		xor bx, bx ; PAGE
+		int 10h
+		
+		.next:
+		inc si
+		jmp .loop
+	.exitLoop:
+	; Verificar si hay más
+	call PrintLn
+	
+	xor bh, bh
+	cmp bh, [si]
+	jnz .msg_leermas
+	cmp bh, [si+1]
+	jnz .msg_leermas
+	
+	jmp .cmdEndG
+	
+	
+	.msg_leermas:
+	mov di, si
+	call __more
+	cmp bl, byte 0
+	jnz .cmdEndG
+	
+	pusha
+	call GetCursorPos
+	sub dh, 2
+	xor dl, dl
+	call SetCursorPos
+	mov ah, 0x09
+	mov al, ' '
+	xor bh, bh
+	mov bl, [COLOR]
+	mov cx, 0x80
+	int 10h
+	popa
+	
+	xor bh, bh
+	cmp bh, [di]
+	jnz .leermas ; No es 0x0001
+	inc bh
+	cmp bh, [di+1]
+	jnz .leermas
+	
+	; Leermas1
+	mov bh, [._c]
+	mov bl, [._c+1]
+	inc bx
+	mov [._c], bh
+	mov [._c+1], bl
+	call _BRFS_ReadSector
+	jmp .starti2
+	
+	.leermas:
+	mov bh, [di]
+	mov bl, [di+1]
+	call _BRFS_ReadSector
+	jmp .starti2
+	
+	.cmdEndB:
+	mov si, _str_cc_unkPath
+	call PrintStringLn
+	jmp .cmdEnd
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
 str_cmd_RUN:
 	db 'RUN',0
 str_cmdh_RUN:
@@ -455,7 +638,7 @@ cmd_RUN:
 	
 	.comm:
 	
-	mov si, 0x9e00
+	mov si, BasicSpace
 	call BasicInterpret
 	
 	xor bx, bx
@@ -488,6 +671,7 @@ cmd_VER:
 	xor bx, bx
 	.cmdEnd:
 	ret
+
 
 
 __ensure:
@@ -547,6 +731,8 @@ _str_cc_OFF:
 	db 13,'> Press ENTER to turn off the computer, or any other key to cancel.', 0
 _str_cc_OFF2:
 	db '> Shutting down...',0
+_str_cc_unkPath:
+	db 'Unknown file or path.',0
 _str_cc_Unk:
 	db ' -- Este comando no esta terminado xD --',0
 _str_cc_version:
