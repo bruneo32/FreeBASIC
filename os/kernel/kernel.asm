@@ -4,5 +4,6 @@
 %include "kernel/filesystem.asm"
 %include "kernel/keyboard.asm"
 %include "kernel/print.asm"
+%include "kernel/secretgame.asm"
 %include "kernel/strings.asm"
 %include "kernel/system.asm"

@@ -1,17 +1,14 @@
 PrintLn:
-	pusha
 	mov ah, 0x0e
 	xor bx, bx
 	mov al, 0x0d
 	int 0x10
 	mov al, 0x0a
 	int 0x10
-	popa
 	ret
 
 PrintString:
 	; SI: String adress
-	pusha
 	mov ah, 0x0e
 	.loop:
 		cmp [si], byte 0
@@ -35,7 +32,6 @@ PrintString:
 		inc si
 		jmp .loop
 	.exitloop:
-	popa
 	ret
 PrintStringLn:
 	; SI: String adress

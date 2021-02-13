@@ -117,6 +117,16 @@ _sys_wait:
 	int 15h
 	ret
 
+Sleep:
+	; CX: Sleep in milliseconds
+	mov ax, 1000
+	mul cx
+	; Return DX:AX = source * AX
+	mov cx, dx
+	mov dx, ax
+	call _sys_wait
+	ret
+
 _sys_shutdown:
 	; APM
     mov ax, 0x1000

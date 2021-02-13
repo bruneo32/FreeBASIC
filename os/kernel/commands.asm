@@ -14,8 +14,6 @@ str_cmds:
 	
 str_cmd_HELP:
 	db 'HELP',0
-str_cmdh_HELP:
-	db ' (?) Descubriste un easter egg XD.',0
 cmd_HELP:
 	; Verificacion rutinaria
 	cmp bh, byte 0 ; Si el comando introducido no era OFF, terminar
@@ -24,8 +22,8 @@ cmd_HELP:
 	mov bh, byte '?'
 	cmp bh, [_InputBuffer+5]
 	jnz .comm
-	mov si, str_cmdh_HELP
-	call PrintStringLn
+	call __SECRETGAME__
+	call ConsoleClear
 	xor bx, bx
 	jmp .cmdEnd
 	

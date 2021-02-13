@@ -1,5 +1,4 @@
 GetPromptString:
-	pusha
 	call _ClearInputBuffer
 	mov bx, _InputBuffer ; Direcction de inicio de _InputBuffer
 	
@@ -54,7 +53,6 @@ GetPromptString:
 			jmp .continueLoop
 	
 	.exitLoop:
-	popa
 	; String adress stored in _InputBuffer address
 	ret
 
