@@ -1,14 +1,20 @@
 str_cmds:
-	db 'Type a command followed by "?" for more help.    Ej.: PRE ?',13
+	db ' Type a command followed by "?" for more help.    Ej.:  COLOR ?',13
 	db 13
-	db 'Commands about BASIC:',13
-	db ' > LIST, LOAD, NEW, RUN, SAVE',13
+	db ' Commands about BASIC:',13
+	db '  > LIST, LOAD, NEW, RUN, SAVE',13
 	db 13
-	db 'Commands about system:',13
-	db ' > CDT, CLS, COL, HELP, OFF, PRE, VER',13
+	db ' Commands about system:',13
+	db '  > CDT, CLS, COLOR, HELP, MEM, OFF, PRE, PRG, SYS, VER',13
 	db 13
-	db 'Commands about filesystem:',13
-	db ' > CAT, CD, DEL, DELD, MD, REN, REND, RTX, WTX',13
+	db ' Commands about filesystem:',13
+	db '  > CAT, CD, DEL, DELD, MD, REN, REND, RTX, WTX',13
+	db 13
+	db ' Commands about filesystem (advanced):',13
+	db '  > COPY, COPYD, INF, MOV, MOVD, STD',13
+	db 13
+	db ' Commands about disks:',13
+	db '  > CR, DSK, FORMAT'
 	
 	db 0
 	
@@ -335,7 +341,200 @@ cmd_LIST:
 	
 	.comm:
 	
-	call MIT_LIST
+	mov si, BasicSpace
+	call PrintString
+	; call MIT_LIST
+	
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_LOAD:
+	db 'LOAD',0
+str_cmdh_LOAD:
+	db ' (?) Load a BASIC program, overwritting the current program.',0
+cmd_LOAD:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+5]
+	jnz .comm
+	mov si, str_cmdh_RTX
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	; vars
+	._c:	dw 0
+	
+	.comm:
+	
+	mov bh, byte 0
+	cmp bh, [_InputBuffer+5]
+	jz .cmdEnd
+	mov bh, 13 ; .cmd files
+	cmp bh, [_InputBuffer+5]
+	jz .cmdEnd
+	
+	call _BRFS_ReadSectorCD
+	jc .cmdEndB
+	
+	; Buscar si existe
+	mov bl, 0x1c ; Fichero
+	mov si, _InputBuffer+5
+	call _BRFS_GetElementFromDir
+	jc .cmdEndB ; No existe
+	; Adress in DX
+	mov [._c], dh
+	mov [._c+1], dl
+	
+	mov bh, dh
+	mov bl, dl
+	call _BRFS_ReadSector
+	jc .cmdEndB
+	
+	pusha
+	call cmd_NEW.preloopi
+	popa
+	
+	.starti2:
+	mov si, _BRFS_TMS_
+	.loop:
+		cmp si, _BRFS_TMS_+510
+		jz .exitLoop
+		
+		mov bh, [si]
+		mov di, word [BasicProgramCounter]
+		mov [di], bh
+		
+		.next:
+		inc si
+		inc word [BasicProgramCounter]
+		jmp .loop
+	.exitLoop:
+	; Verificar si hay más
+	xor bh, bh
+	cmp bh, [si]
+	jnz .msg_leermas
+	cmp bh, [si+1]
+	jnz .msg_leermas
+	
+	jmp .cmdEndG
+	
+	
+	.msg_leermas:
+	xor bh, bh
+	cmp bh, [si]
+	jnz .leermas ; No es 0x0001
+	inc bh
+	cmp bh, [si+1]
+	jnz .leermas
+	
+	; Leermas1
+	mov bh, [._c]
+	mov bl, [._c+1]
+	inc bx
+	mov [._c], bh
+	mov [._c+1], bl
+	call _BRFS_ReadSector
+	jmp .starti2
+	
+	.leermas:
+	mov bh, [si]
+	mov bl, [si+1]
+	call _BRFS_ReadSector
+	jmp .starti2
+	
+	.cmdEndB:
+	mov si, _str_cc_unkPath
+	call PrintStringLn
+	jmp .cmdEnd
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_MEM:
+	db 'MEM',0
+str_cmdh_MEM:
+	db ' (?) Reports the number of contiguous 1K memory blocks in the system (up to 640K).',0
+cmd_MEM:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_MEM
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	.str1:
+		db '   Memory size in 1K blocks (up to 640K) :  0x',0
+	.memsize:
+		db 0,0,0,0
+		db 0
+	.str2:
+		db '   Accessibles by the system             :  0x80 =0x40+0x40 [-2 bytes]',13
+		db 13
+		db '   Lower memory size   (0000 - 7E00)     :  0x20',13
+		db '   System size         (7E00 - AA00)     :  0x0B',13
+		db '   BASIC program space (AA00 - FFFF)     :  0x15',13
+		db '   Programs space      (10000 - 1FFFE)   :  0x40 [-2 bytes]',0
+	
+	
+	.comm:
+	
+	pusha
+	
+	call PrintLn
+	
+	mov si, .str1
+	call PrintString
+	
+	int 12h ; Return mem size in AX
+	
+		xor bx, bx
+		mov bl, ah
+		shl bx, 4
+		shr bl, 4
+		add bh, '0' ; Convertir a ASCII
+		add bl, '0' ; Convertir a ASCII
+		cmp bh, '9'
+		jbe .ibh1
+		add bh, 7 ; Hasta la 'A'
+.ibh1:	cmp bl, '9'
+		jbe .ibl1
+		add bl, 7 ; Hasta la 'A'
+.ibl1:	mov [.memsize], bh
+		mov [.memsize+1], bl
+	
+		xor bx, bx
+		mov bl, al
+		shl bx, 4
+		shr bl, 4
+		add bh, '0' ; Convertir a ASCII
+		add bl, '0' ; Convertir a ASCII
+		cmp bh, '9'
+		jbe .ibh2
+		add bh, 7 ; Hasta la 'A'
+.ibh2:	cmp bl, '9'
+		jbe .ibl2
+		add bl, 7 ; Hasta la 'A'
+.ibl2:	mov [.memsize+2], bh
+		mov [.memsize+3], bl
+	
+	mov si, .memsize
+	call PrintStringLn
+	
+	mov si, .str2
+	call PrintStringLn
+	
+	popa
 	
 	xor bx, bx
 	.cmdEnd:
@@ -344,7 +543,7 @@ cmd_LIST:
 str_cmd_NEW:
 	db 'NEW',0
 str_cmdh_NEW:
-	db ' (?) Clear the program in memory.',0
+	db ' (?) Clear the program in memory. Use "NEW +" to avoid prompting.',0
 cmd_NEW:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -361,15 +560,20 @@ cmd_NEW:
 	.comm:
 	xor bx, bx
 	
+	mov bh, byte '+' ; Sin preguntar
+	cmp bh, [_InputBuffer+4]
+	jz .preloopi
+	
 	call __ensure
 	cmp bl, byte 0
 	jnz .cmdEnd
 	
-	mov si, 0x9e00
+	.preloopi:
+	mov si, BasicSpace
 	.loopi:
 		; Limitar
 		mov bx, 0xce00
-		cmp di, bx ; 0x9e00 + 12KB
+		cmp di, bx ; BasicSpace Limit
 		jae .exitLoop
 		
 		mov bh, byte 0
@@ -381,7 +585,7 @@ cmd_NEW:
 		inc si
 		jmp .loopi
 	.exitLoop:
-	mov [BasicProgramCounter], word 0x9e00
+	mov [BasicProgramCounter], word BasicSpace
 	
 	xor bx, bx
 	.cmdEnd:
@@ -390,7 +594,7 @@ cmd_NEW:
 str_cmd_OFF:
 	db 'OFF',0
 str_cmdh_OFF:
-	db ' (?) Turns off the computer. Use "OFF +" to shut down without prompting.',0
+	db ' (?) Turns off the computer. Use "OFF +" to avoid prompting.',0
 cmd_OFF:
 	; Verificacion rutinaria
 	cmp bh, byte 0 ; Si el comando introducido no era OFF, terminar
@@ -445,7 +649,7 @@ cmd_OFF:
 str_cmd_PRE:
 	db 'PRE',0
 str_cmdh_PRE:
-	db ' (?) Change the prefix of the commands (default: "# "). Maximum 6 characters.',0
+	db ' (?) Change the prefix of the command line (default: "# "). Maximum 6 characters.',0
 cmd_PRE:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -476,6 +680,37 @@ cmd_PRE:
 		
 		jmp .loop
 	.exitLoop:
+	
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_PRG:
+	db 'PRG',0
+str_cmdh_PRG:
+	db ' (?) Load a compiled program file (*.prg) in 0x10000, and the runs it.',0
+cmd_PRG:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_PRG
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	.comm:
+	mov si, 0x0000
+	mov al, byte 'H'
+	call ExtendedStore
+	
+	call ExtendedLoad
+	mov ah, 0x0e
+	xor bx, bx
+	int 0x10
 	
 	xor bx, bx
 	.cmdEnd:
@@ -528,7 +763,6 @@ cmd_RTX:
 	jc .cmdEndB
 	
 	.starti2:
-	call PrintLn
 	mov si, _BRFS_TMS_
 	.loop:
 		cmp si, _BRFS_TMS_+510
@@ -668,7 +902,66 @@ cmd_VER:
 	.cmdEnd:
 	ret
 
-
+str_cmd_WTX:
+	db 'WTX',0
+str_cmdh_WTX:
+	db ' (?) Write from console prompt to a specified text file (Argument 1). Ex.: WTX example.txt',0
+cmd_WTX:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_WTX
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	; vars
+	._c:	dw 0
+	
+	.comm:
+	
+	mov bh, byte 0
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEnd
+	mov bh, 13 ; .cmd files
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEnd
+	
+	call _BRFS_ReadSectorCD
+	jc .cmdEndB
+	
+	; Buscar si existe
+	mov bl, 0x1c ; Fichero
+	mov si, _InputBuffer+4
+	call _BRFS_GetElementFromDir
+	jnc .cmdEndB ; Ya existe
+	
+	
+	.starti2:
+	mov si, _BRFS_TMS_
+	.loop:
+		cmp si, _BRFS_TMS_+510
+		jz .exitLoop
+		
+		
+		
+		.next:
+		inc si
+		jmp .loop
+	.exitLoop:
+	jmp .cmdEndG
+	
+	.cmdEndB:
+	mov si, _str_cc_knownPath
+	call PrintStringLn
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
 
 __ensure:
 	mov si, _str__ensure
@@ -729,15 +1022,17 @@ _str_cc_OFF2:
 	db '> Shutting down...',0
 _str_cc_unkPath:
 	db 'Unknown file or path.',0
+_str_cc_knownPath:
+	db 'The file or path already exists.',0
 _str_cc_Unk:
 	db ' -- Este comando no esta terminado xD --',0
 _str_cc_version:
 	db ' FreeBASIC 0.1.1        published under GPL 3 license.',13
 	db 13
-	db ' > System               by Bruno Castro',13
+	db ' > System               by Bruno Castro Garcia',13
 	db '   version 0.1          [bruno@retronomicon.gq]',13
 	db 13
-	db ' > Basic Interpreter    by Angel Ruiz Fernandez',13
+	db ' > BASIC Core           by Angel Ruiz Fernandez',13
 	db '   version 0.1          [aruizfernandez05@gmail.com]',13
 	
 	db 0

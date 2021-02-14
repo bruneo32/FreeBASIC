@@ -1,3 +1,4 @@
+__SecretSleep__ equ 100
 __SECRETGAME__:
 	
 	mov bx, word 1
@@ -16,7 +17,7 @@ __SECRETGAME__:
 		
 		call .bajar
 		
-		mov cx, 300
+		mov cx, __SecretSleep__
 		call Sleep
 		
 		pop cx
@@ -56,7 +57,7 @@ __SECRETGAME__:
 		
 		call .bajar
 		
-		mov cx, 300
+		mov cx, __SecretSleep__
 		call Sleep
 		
 		pop cx
@@ -81,3 +82,8 @@ __SG_BASIC_STR:
 	; ╚═╝╩ ╩╚═╝╩╚═╝
 	; But with the correct bytes
 	; http://www.asciitable.com
+	;
+	; It's written backwards because the screen is scrolling
+	; ╚═╝╩ ╩╚═╝╩╚═╝
+	; ╠╩╗╠═╣╚═╗║║  
+	; ╔╗ ╔═╗╔═╗╦╔═╗

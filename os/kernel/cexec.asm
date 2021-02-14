@@ -51,6 +51,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	MEM
+	mov si, _InputBuffer
+	mov di, str_cmd_MEM
+	call iStringCompareSpace
+	call cmd_MEM
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	NEW
 	mov si, _InputBuffer
 	mov di, str_cmd_NEW
@@ -67,6 +75,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	LOAD
+	mov si, _InputBuffer
+	mov di, str_cmd_LOAD
+	call iStringCompareSpace
+	call cmd_LOAD
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	OFF
 	mov si, _InputBuffer
 	mov di, str_cmd_OFF
@@ -80,6 +96,14 @@ _con_exec:
 	mov di, str_cmd_PRE
 	call iStringCompareSpace
 	call cmd_PRE
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
+	;	PRG
+	mov si, _InputBuffer
+	mov di, str_cmd_PRG
+	call iStringCompareSpace
+	call cmd_PRG
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
@@ -107,6 +131,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	WTX
+	mov si, _InputBuffer
+	mov di, str_cmd_WTX
+	call iStringCompareSpace
+	call cmd_WTX
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 	
@@ -127,7 +159,7 @@ _bas_store:
 	mov di, word [BasicProgramCounter]
 	.loop:
 		; Limitar
-		mov bx, 0xce00
+		mov bx, 0xffff
 		cmp di, bx ; 0x9e00 + 12KB
 		jae .error
 		
@@ -159,9 +191,12 @@ _bas_store:
 		jmp .end
 	
 	.error:
-	; Te pasaste de 12KB y ya no te permito más,
+	; Te pasaste de y ya no te permito más,
 	; porque este es el sector de memoria de otra cosa.
 	; Mejor haz un NEW
+	mov si, _str_basicoverflow
+	call PrintStringLn
+	mov di, 0xffff
 	
 	.end:
 	mov word [BasicProgramCounter], di
@@ -206,6 +241,9 @@ TryCommandOrBas:
 	
 	.end:
 	ret
+
+_str_basicoverflow:
+	db '[ERROR] BASIC program overflow, you reached 0xFFFF.',0
 
 _str_nocom:
 	db '[Error] Unknown or invalid command.',0

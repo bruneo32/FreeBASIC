@@ -118,6 +118,7 @@ _sys_wait:
 	ret
 
 Sleep:
+	pusha
 	; CX: Sleep in milliseconds
 	mov ax, 1000
 	mul cx
@@ -125,6 +126,7 @@ Sleep:
 	mov cx, dx
 	mov dx, ax
 	call _sys_wait
+	popa
 	ret
 
 _sys_shutdown:
@@ -140,8 +142,6 @@ _sys_shutdown:
 	; ACPI (if APM didnt work)
 	; ???
 	
-	cli
-	hlt
 	.error:
 	ret
 

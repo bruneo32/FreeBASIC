@@ -23,7 +23,7 @@ BPB:
 EBPB: ; -------------------------------------------------
 	db 0						; drive number
 	db 0						; reserved
-	db 0x29						; signature, maybe 0 or 29 or 28
+	db 0x69						; signature, maybe 0 or 29 or 28
 	dd 0						; volume ID
 	db 'NO LABEL   '			; volume label, 11 bytes
 	db 'BRFS    '				; file system type, 8 bytes
@@ -56,7 +56,7 @@ mov [BOOT_DRIVE], dl
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Leer segundo sector en PROGRAM_SPACE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SECTORS equ 0x10 ; Sectors to read. x10 = 16 dec (ver: main.asm ~final)
+SECTORS equ 0x16 ; Sectors to read. x16 = 22 dec (ver: main.asm ~final)
 xor ax, ax ; Reset disk
 int 13h
 
@@ -127,7 +127,7 @@ db 0x55,0xaa
 
 ; ROOT
 ROOT:
-db 'hola.txt',0x1c,0x00,0x12 ; sector18
-db 'FOLDER',0x1d,0x00,0x13 ; sector18
+db 'hola.txt',0x1c,0x00,0x18
+db 'FOLDER',0x1d,0x00,0x19
 
 times 512-($-ROOT) db 0
