@@ -1,7 +1,7 @@
 _strcmp:
 	; ARG 0 : SI
 	; ARG 1 : DI
-	; IgnoreCase: if ==byte 1
+	; IgnoreCase: if [IgnoreCase]==byte 1
 	
 	; Using BX to compare
 	
@@ -90,11 +90,6 @@ StringCompareSpace:
 	mov [IgnoreCase], byte 0
 	call _strcmp
 	ret
-StringCompareComma:
-	mov [_stopchar], byte ','
-	mov [IgnoreCase], byte 0
-	call _strcmp
-	ret
 
 iStringCompare:
 	mov [_stopchar], byte 0
@@ -103,11 +98,6 @@ iStringCompare:
 	ret
 iStringCompareSpace:
 	mov [_stopchar], byte 32 ; SPACE
-	mov [IgnoreCase], byte 1
-	call _strcmp
-	ret
-iStringCompareComma:
-	mov [_stopchar], byte ','
 	mov [IgnoreCase], byte 1
 	call _strcmp
 	ret

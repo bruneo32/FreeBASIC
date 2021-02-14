@@ -1,6 +1,7 @@
 [org 0x7e00]
 
-BasicSpace equ 0x9e00 ; 16 sectores después
+BasicSpace equ 0x9e00
+GeneralSpace equ 0xce00
 
 
 mov [BOOT_DRIVE], dl
@@ -34,7 +35,7 @@ BOOT_DRIVE:	db 0
 times 256-($-$$) db 0 ; offset hasta el 7d00
 
 ; 0x7f00
-KIT: ; KIT, Kernel Interrupt Vector
+KIT: ; KIT, Kernel Interface Table
 	dw PrintString
 	dw PrintLn
 	dw PrintStringLn
@@ -44,21 +45,20 @@ KIT: ; KIT, Kernel Interrupt Vector
 	dw __more
 	
 	times 32-($-KIT) db 0
-	db 0x5a,0x7a ; KIT End Signature
+	db 0x5a,0x7a ; KIT/MIT End Signature
 
 BasicProgramCounter: dw BasicSpace
 
 
 %include "templates/appleii.asm"
 %include "kernel/kernel.asm"
+%include "basic/mit.asm" ; Module Interface Table
 
 times 9*512-($-$$) db 0
 ; ----------------------------------------
 ; 0x9000
 
-BasicInterpret:
-	incbin "basic/interpret.bin"
-	ret ; No deberia poder llegar hasta aqui
+incbin "basic/interpret.bin" ; Usar MIT
 
 times 7*512-($-BasicInterpret) db 0
 ; ----------------------------------------

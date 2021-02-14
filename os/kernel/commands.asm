@@ -335,9 +335,7 @@ cmd_LIST:
 	
 	.comm:
 	
-	mov si, 0x9e00
-	call PrintString
-	; No hace falta PrintLn porque siempre hay un CR al final
+	call MIT_LIST
 	
 	xor bx, bx
 	.cmdEnd:
@@ -637,7 +635,7 @@ cmd_RUN:
 	.comm:
 	
 	mov si, BasicSpace
-	call BasicInterpret
+	call MIT_INTERPRET
 	
 	xor bx, bx
 	.cmdEnd:

@@ -1,12 +1,13 @@
 __SECRETGAME__:
-	; Hide cursor
-	mov dx, 0x2580
-	call SetCursorPos
 	
 	mov bx, word 1
 	push bx
 	
 	.preloop1:
+	; Hide cursor
+	mov dx, 0x2580
+	call SetCursorPos
+	
 	mov cx, word 25 ; Screen height
 	.loop1:
 		cmp cx, word 0
@@ -78,3 +79,5 @@ __SG_BASIC_STR:
 	; ╔╗ ╔═╗╔═╗╦╔═╗
 	; ╠╩╗╠═╣╚═╗║║  
 	; ╚═╝╩ ╩╚═╝╩╚═╝
+	; But with the correct bytes
+	; http://www.asciitable.com
