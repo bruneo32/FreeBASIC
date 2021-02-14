@@ -57,10 +57,10 @@ BasicProgramCounter: dw BasicSpace
 times 9*512-($-$$) db 0
 ; ----------------------------------------
 ; 0x9000
+MIT:
+incbin "basic/core.bin" ; Usar MIT
 
-incbin "basic/interpret.bin" ; Usar MIT
-
-times 7*512-($-BasicInterpret) db 0
+times 7*512-($-MIT) db 0
 ; ----------------------------------------
 ; 16 sectores, reservados para el sistema, lo siguiente será el sistema de archivos en el disco, pero en la memoria el programa BASIC
 
