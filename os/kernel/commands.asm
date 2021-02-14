@@ -11,7 +11,7 @@ str_cmds:
 	db '  > CAT, CD, DEL, DELD, MD, REN, REND, RTX, WTX',13
 	db 13
 	db ' Commands about filesystem (advanced):',13
-	db '  > COPY, COPYD, INF, MOV, MOVD, STD',13
+	db '  > COPY, COPYD, INF, INFD, MOV, MOVD, STR, STRD',13
 	db 13
 	db ' Commands about disks:',13
 	db '  > CR, DSK, FORMAT'
@@ -322,6 +322,107 @@ cmd_EMP:
 	.cmdEnd:
 	ret
 
+str_cmd_INF:
+	db 'INF',0
+str_cmdh_INF:
+	db ' (?) Watch information about a file. Use INFD for directories.',0
+cmd_INF:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_INF
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	.str_size:
+		db '  Size:  X',0
+	.str_sectors:
+		db ' sectors',0
+	.str_lba:
+		db '  LBA :  0x',0
+	
+	.sizecount:
+		times 6 db 0
+		db 0
+	.lbahex:
+		times 4 db 0
+		db 0
+	
+	.comm:
+	
+	mov bl, [_InputBuffer+4]
+	cmp bl, byte 0
+	jz .cmdEndG
+	
+	; Buscar si existe
+	call _BRFS_ReadSectorCD
+	jc .cmdEnd
+	mov bl, 0x1c
+	mov si, _InputBuffer+4
+	call _BRFS_GetElementFromDir
+	jc .cmdEndB ; No existe
+	
+	
+	; LBA to HEX
+		xor bx, bx
+		mov bl, dh
+		shl bx, 4
+		shr bl, 4
+		add bh, '0' ; Convertir a ASCII
+		add bl, '0' ; Convertir a ASCII
+		cmp bh, '9'
+		jbe .ibh1
+		add bh, 7 ; Hasta la 'A'
+.ibh1:	cmp bl, '9'
+		jbe .ibl1
+		add bl, 7 ; Hasta la 'A'
+.ibl1:	mov [.lbahex], bh
+		mov [.lbahex+1], bl
+		
+		xor bx, bx
+		mov bl, dl
+		shl bx, 4
+		shr bl, 4
+		add bh, '0' ; Convertir a ASCII
+		add bl, '0' ; Convertir a ASCII
+		cmp bh, '9'
+		jbe .ibh2
+		add bh, 7 ; Hasta la 'A'
+.ibh2:	cmp bl, '9'
+		jbe .ibl2
+		add bl, 7 ; Hasta la 'A'
+.ibl2:	mov [.lbahex+2], bh
+		mov [.lbahex+3], bl
+	
+	call PrintLn
+	
+	mov si, .str_size
+	call PrintString
+	mov si, .str_sectors
+	call PrintString
+	mov si, .sizecount
+	call PrintStringLn
+	
+	mov si, .str_lba
+	call PrintString
+	mov si, .lbahex
+	call PrintStringLn
+	
+	jmp .cmdEndG
+	
+	.cmdEndB:
+	mov si, _str_cc_unkPath
+	call PrintStringLn
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
 str_cmd_LIST:
 	db 'LIST',0
 str_cmdh_LIST:
@@ -474,7 +575,7 @@ cmd_MEM:
 	jmp .cmdEnd
 	
 	.str1:
-		db '   Memory size in 1K blocks (up to 640K) :  0x',0
+		db '   Memory size,  1K blocks (up to 640K)  :  0x',0
 	.memsize:
 		db 0,0,0,0
 		db 0
@@ -483,8 +584,8 @@ cmd_MEM:
 		db 13
 		db '   Lower memory size   (0000 - 7E00)     :  0x20',13
 		db '   System size         (7E00 - AA00)     :  0x0B',13
-		db '   BASIC program space (AA00 - FFFF)     :  0x15',13
-		db '   Programs space      (10000 - 1FFFE)   :  0x40 [-2 bytes]',0
+		db '   BASIC program space (AA00 - 10000)    :  0x15',13
+		db '   Programs space      (10000 - 1FFFF)   :  0x40 [-2 bytes]',0
 	
 	
 	.comm:

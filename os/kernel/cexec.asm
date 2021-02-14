@@ -51,6 +51,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	INF
+	mov si, _InputBuffer
+	mov di, str_cmd_INF
+	call iStringCompareSpace
+	call cmd_INF
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	MEM
 	mov si, _InputBuffer
 	mov di, str_cmd_MEM
