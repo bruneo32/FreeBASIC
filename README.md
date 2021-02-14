@@ -60,7 +60,7 @@ Total space              1MiB    /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  
                                 =                                                 =
   0xAA00                        ===================================================
                                 = OS  kernel                                      = --> KIT: 0x7F00 (length: 32 bytes)
-                                = & BASIC Core                                      = --> MIT: 0x9E00 (length: 32 bytes)
+                                = & BASIC Core                                    = --> MIT: 0x9E00 (length: 32 bytes)
                                 =                                  11K : 11264    =
   0x7E00                        ===================================================
                                 = BOOT bootloader                 0.5K : 512      =
