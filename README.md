@@ -39,7 +39,7 @@ Total space              1MiB    /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  
                                 =                                                 =
                                 =                                                 =
   0x1FFFE                       =================================================== <--  Maximum accessible with FreeBASIC extended addresing.
-   65535 bytes                  = General purpose space                           =
+                                = General purpose space                           =
                                 =                                                 =
                                 = Used by the interpreter, *.prg programs and     =
                                 = similar stuff.                                  =
