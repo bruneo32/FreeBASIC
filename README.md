@@ -12,7 +12,7 @@ Generates `/os/basic/interpret.bin` flat binary, and `/os/basic/interpret` elf32
 ## Memory map
 ```
 Total space              1MiB
-  0x00100000   Special          ===================================================    *Each line 64K
+  0x000FFFFF   Special          ===================================================    *Each line 64K
    384K                         = Reserved VRAM, memory mapped I/O                =
                                 =                                                 =
                                 =                        384K   393215            =
