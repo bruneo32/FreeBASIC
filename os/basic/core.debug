@@ -1,0 +1,55 @@
+
+core.bin:     file format binary
+
+
+Disassembly of section .data:
+
+00000000 <.data>:
+   0:	89 36 08 90          	mov    WORD PTR ds:0x9008,si
+   4:	e8 2f 00             	call   0x36
+   7:	c3                   	ret    
+   8:	00 00                	add    BYTE PTR [bx+si],al
+   a:	89 e3                	mov    bx,sp
+   c:	83 c3 02             	add    bx,0x2
+   f:	8b 37                	mov    si,WORD PTR [bx]
+  11:	ff 16 00 7f          	call   WORD PTR ds:0x7f00
+  15:	c3                   	ret    
+  16:	ff 16 02 7f          	call   WORD PTR ds:0x7f02
+  1a:	c3                   	ret    
+  1b:	89 e3                	mov    bx,sp
+  1d:	83 c3 02             	add    bx,0x2
+  20:	8b 37                	mov    si,WORD PTR [bx]
+  22:	ff 16 04 7f          	call   WORD PTR ds:0x7f04
+  26:	c3                   	ret    
+  27:	ff 16 06 7f          	call   WORD PTR ds:0x7f06
+  2b:	c3                   	ret    
+  2c:	ff 16 0a 7f          	call   WORD PTR ds:0x7f0a
+  30:	c3                   	ret    
+  31:	ff 16 0c 7f          	call   WORD PTR ds:0x7f0c
+  35:	c3                   	ret    
+  36:	55                   	push   bp
+  37:	89 e5                	mov    bp,sp
+  39:	83 ec 02             	sub    sp,0x2
+  3c:	c6 46 ff 00          	mov    BYTE PTR [bp-0x1],0x0
+  40:	eb 14                	jmp    0x56
+  42:	b8 67 90             	mov    ax,0x9067
+  45:	50                   	push   ax
+  46:	16                   	push   ss
+  47:	1f                   	pop    ds
+  48:	e8 d0 ff             	call   0x1b
+  4b:	83 c4 02             	add    sp,0x2
+  4e:	8a 46 ff             	mov    al,BYTE PTR [bp-0x1]
+  51:	fe c0                	inc    al
+  53:	88 46 ff             	mov    BYTE PTR [bp-0x1],al
+  56:	80 7e ff 09          	cmp    BYTE PTR [bp-0x1],0x9
+  5a:	80 7e ff 09          	cmp    BYTE PTR [bp-0x1],0x9
+  5e:	7e e2                	jle    0x42
+  60:	90                   	nop
+  61:	89 ec                	mov    sp,bp
+  63:	5d                   	pop    bp
+  64:	16                   	push   ss
+  65:	1f                   	pop    ds
+  66:	c3                   	ret    
+  67:	58                   	pop    ax
+  68:	44                   	inc    sp
+	...
