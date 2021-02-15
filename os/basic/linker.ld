@@ -1,9 +1,9 @@
 OUTPUT_FORMAT("binary")
 OUTPUT(interpret.bin)
-ENTRY(start)
+ENTRY(_interpret)
 SECTIONS
 {
-   . = 0x9000;
+   . = 0x9e00;
    .text : { *(.boot) *(.text) }
    .rodata : { *(.rodata) }
    .data : { *(.data) }

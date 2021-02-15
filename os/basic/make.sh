@@ -2,7 +2,7 @@
 
 echo intermediate
 nasm -f elf32 					entry.asm -o 		entry.o
-ia16-elf-gcc -Wall -c	 			main.c -o 		main.o
+ia16-elf-gcc -Wall -fno-builtin -c		main.c -o 		main.o
 
 echo elf
 ia16-elf-gcc -T linkerelf.ld -nostartfiles 	entry.o main.o  -o      interpret
