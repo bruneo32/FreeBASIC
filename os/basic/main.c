@@ -153,6 +153,6 @@ void list() {
 }
 
 void interpret() {
-	//PrintStringLn("interpretando :)");
-	PrintLn();
+	PrintStringLn("interpretando :)");
+	//PrintLn();
 }
