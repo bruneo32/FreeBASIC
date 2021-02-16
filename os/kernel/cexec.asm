@@ -59,6 +59,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	INFD
+	mov si, _InputBuffer
+	mov di, str_cmd_INFD
+	call iStringCompareSpace
+	call cmd_INFD
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	MEM
 	mov si, _InputBuffer
 	mov di, str_cmd_MEM
@@ -212,6 +220,10 @@ _bas_store:
 	ret
 
 TryCommandOrBas:
+	;; Uncomment this block to debug the keyboard buffer.
+	; mov si, _InputBuffer
+	; call PrintStringLn
+	; ret
 	
 	; Verificar si es un numero hasta el SPACE
 	

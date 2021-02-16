@@ -41,8 +41,8 @@ mov es, ax
 mov fs, ax
 mov gs, ax
 
-mov bx, 0x7a00 ; x7a00-x7c00 = BRFS-TMS
-mov ebx, 0x00007a00 ; For x86_64 machines
+mov bx, 0x7800 ; x7a00 = BRFS-TRS, 0x7800 = BRFS-TWS
+mov ebx, 0x00007800 ; For x86_64 machines
 cli
 mov ss, ax
 mov sp, bx

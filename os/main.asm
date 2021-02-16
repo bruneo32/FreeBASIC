@@ -65,4 +65,4 @@ times 6*512-($-MIT) db 0
 
 ; 0xAA00 en memoria
 ; Aqui va el BasicSpace en RAM
-; 9216 bytes hasta 0xCE00
+; 22015 bytes hasta 0xFFFF

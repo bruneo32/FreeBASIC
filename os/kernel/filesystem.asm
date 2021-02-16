@@ -1,4 +1,5 @@
-_BRFS_TMS_ equ 0x7a00 ; 512 antes de 0x7c00
+_BRFS_TRS_ equ 0x7a00 ; 512 antes de 0x7c00
+_BRFS_TWS_ equ 0x7800 ; 512 antes de 0x7a00
 _CD:
 	db 0x00,0x01 ; Root
 ; _CD_str_buffer equ 300
@@ -76,7 +77,7 @@ _BRFS_ReadSector:
 	; Adress in BH:BL
 	call LBA2CHS
 	
-	mov bx, _BRFS_TMS_
+	mov bx, _BRFS_TRS_
 	mov cx, 512
 	.clear:
 		cmp cx, word 0
@@ -95,7 +96,7 @@ _BRFS_ReadSector:
 	
 	xor bx, bx
 	mov es, bx
-	mov bx, _BRFS_TMS_
+	mov bx, _BRFS_TRS_
 	mov al, 0x01 ; Sectors to read
 	mov ch, [_lba_C] ; Cilindro.
 	mov dh, [_lba_H] ; Cabeza.
@@ -153,9 +154,9 @@ _BRFS_GetElementFromDir:
 	mov bl, [.almac+1]
 	mov si, bx
 	xor dx, dx
-	mov di, _BRFS_TMS_
+	mov di, _BRFS_TRS_
 	.loop:
-		cmp di, _BRFS_TMS_+510
+		cmp di, _BRFS_TRS_+510
 		jae .exitLoop ; Hay que leer más sectores
 		
 		mov bl, [si]
@@ -193,7 +194,7 @@ _BRFS_GetElementFromDir:
 		inc di
 		jmp .loop
 	.exitLoop:
-	mov di, _BRFS_TMS_+510
+	mov di, _BRFS_TRS_+510
 	xor bh, bh
 	cmp bh, [di]
 	jnz .leermas
@@ -217,7 +218,7 @@ _BRFS_GetElementFromDir:
 	jmp .starti2
 	
 	.leermas:
-	mov di, _BRFS_TMS_+510
+	mov di, _BRFS_TRS_+510
 	mov bh, [di]
 	mov bl, [di+1]
 	call _BRFS_ReadSector

@@ -1,8 +1,8 @@
 x0018: ; 0x0012
-	db 'Hola, buenos dias'
+	db 'Hola, buenos dias.',32
 	
 	times 510-($-x0018) db 0
-	dw 0 ; Puntero
+	db 0,0x1c ; Puntero
 
 x0019: ; 0x0013
 	db '..',0x1d,0x00,0x01
@@ -21,11 +21,13 @@ x001a: ; 0x0014
 	dw 0 ; Puntero
 
 x001b: ; 0x0015
-	mov si, x0018
-	call word [0x7f04] ; PrintStringLn
-	call word [0x7f0a] ; __ensure
-	
-	ret
+	incbin "programs/probinha.prg"
 	
 	times 510-($-x001b) db 0
+	dw 0 ; Puntero
+
+x001c:
+	db 'Mucho respeto'
+	
+	times 510-($-x001c) db 0
 	dw 0 ; Puntero

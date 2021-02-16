@@ -14,7 +14,7 @@ str_cmds:
 	db '  > COPY, COPYD, INF, INFD, MOV, MOVD, STR, STRD',13
 	db 13
 	db ' Commands about disks:',13
-	db '  > CR, DSK, FORMAT'
+	db '  > DSK, FORMAT, LD'
 	
 	db 0
 	
@@ -46,7 +46,7 @@ cmd_HELP:
 str_cmd_CAT:
 	db 'CAT',0
 str_cmdh_CAT:
-	db ' (?) Display a list with all the items in the current directory.',0
+	db ' (?) Watch a list with all the items in the current directory.',0
 cmd_CAT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -78,7 +78,7 @@ cmd_CAT:
 	mov cx, 0x10
 	int 10h
 	.starti2:
-	mov si, _BRFS_TMS_
+	mov si, _BRFS_TRS_
 	.loop:
 		cmp cx, byte 0
 		jnz .exitgc
@@ -96,7 +96,7 @@ cmd_CAT:
 		
 		.exitgc:
 		
-		cmp si, _BRFS_TMS_+510
+		cmp si, _BRFS_TRS_+510
 		jae .exitLoop ; Hay que leer más sectores
 		
 		mov bh, [si]
@@ -224,7 +224,6 @@ cmd_CD:
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintStringLn
-	jmp .cmdEnd
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -339,31 +338,78 @@ cmd_INF:
 	xor bx, bx
 	jmp .cmdEnd
 	
+	.comm:
+	
+	mov bl, byte [_InputBuffer+4]
+	cmp bl, byte 0
+	jz .cmdEnd
+	
+	mov bl, 0x1c
+	mov si, _InputBuffer+4
+	call cmd_INF_holder
+	
+	.cmdEnd:
+	ret
+
+str_cmd_INFD:
+	db 'INFD',0
+str_cmdh_INFD:
+	db ' (?) Watch information about a directory. Use INF for files.',0
+cmd_INFD:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+5]
+	jnz .comm
+	mov si, str_cmdh_INFD
+	call PrintStringLn
+	xor bx, bx
+	jmp .cmdEnd
+	
+	.comm:
+	
+	mov bl, byte [_InputBuffer+5]
+	cmp bl, byte 0
+	jz .cmdEnd
+	
+	mov bl, 0x1d
+	mov si, _InputBuffer+5
+	call cmd_INF_holder
+	
+	.cmdEnd:
+	ret
+
+cmd_INF_holder:
+	jmp .comm
+	
 	.str_size:
-		db '  Size:  X',0
-	.str_sectors:
-		db ' sectors',0
+		db '  Size      :  $',0
 	.str_lba:
-		db '  LBA :  0x',0
+		db '  First LBA :  $',0
+	.str_sectors:
+		db ' sector(s) (1 sector = 512 bytes)',0
 	
 	.sizecount:
-		times 6 db 0
+		times 4 db 0
 		db 0
 	.lbahex:
 		times 4 db 0
 		db 0
 	
+	.TYPEE: db 0
+	
 	.comm:
 	
-	mov bl, [_InputBuffer+4]
-	cmp bl, byte 0
-	jz .cmdEndG
+	mov byte [.TYPEE], bl
+	push si
 	
 	; Buscar si existe
 	call _BRFS_ReadSectorCD
 	jc .cmdEnd
-	mov bl, 0x1c
-	mov si, _InputBuffer+4
+	mov bl, byte [.TYPEE]
+	pop si
 	call _BRFS_GetElementFromDir
 	jc .cmdEndB ; No existe
 	
@@ -399,13 +445,74 @@ cmd_INF:
 .ibl2:	mov [.lbahex+2], bh
 		mov [.lbahex+3], bl
 	
+	
+	; SIZE
+	mov cx, word 1
+	push cx
+	
+	.loop:
+		mov bh, dh
+		mov bl, dl
+		call _BRFS_ReadSector
+		jc .cmdEndB
+		
+		mov si, _BRFS_TRS_+510
+		cmp [si], byte 0
+		jnz .next
+		cmp [si+1], byte 0
+		jnz .next
+		
+		jmp .exitLoop
+		
+		.next:
+		pop cx
+		inc cx
+		push cx
+		
+		mov dh, [si]
+		mov dl, [si+1]
+		jmp .loop
+	.exitLoop:
+	pop cx
+		xor bx, bx
+		mov bl, ch
+		shl bx, 4
+		shr bl, 4
+		add bh, '0' ; Convertir a ASCII
+		add bl, '0' ; Convertir a ASCII
+		cmp bh, '9'
+		jbe .ibh3
+		add bh, 7 ; Hasta la 'A'
+.ibh3:	cmp bl, '9'
+		jbe .ibl3
+		add bl, 7 ; Hasta la 'A'
+.ibl3:	mov [.sizecount], bh
+		mov [.sizecount+1], bl
+		
+		xor bx, bx
+		mov bl, cl
+		shl bx, 4
+		shr bl, 4
+		add bh, '0' ; Convertir a ASCII
+		add bl, '0' ; Convertir a ASCII
+		cmp bh, '9'
+		jbe .ibh4
+		add bh, 7 ; Hasta la 'A'
+.ibh4:	cmp bl, '9'
+		jbe .ibl4
+		add bl, 7 ; Hasta la 'A'
+.ibl4:	mov [.sizecount+2], bh
+		mov [.sizecount+3], bl
+	
+	
+	; Display
 	call PrintLn
 	
 	mov si, .str_size
 	call PrintString
-	mov si, .str_sectors
-	call PrintString
 	mov si, .sizecount
+	call PrintString
+	mov si, .str_sectors
 	call PrintStringLn
 	
 	mov si, .str_lba
@@ -442,9 +549,8 @@ cmd_LIST:
 	
 	.comm:
 	
-	mov si, BasicSpace
-	call PrintString
-	; call MIT_LIST
+	mov si, _InputBuffer+5
+	call MIT_LIST
 	
 	xor bx, bx
 	.cmdEnd:
@@ -501,9 +607,9 @@ cmd_LOAD:
 	popa
 	
 	.starti2:
-	mov si, _BRFS_TMS_
+	mov si, _BRFS_TRS_
 	.loop:
-		cmp si, _BRFS_TMS_+510
+		cmp si, _BRFS_TRS_+510
 		jz .exitLoop
 		
 		mov bh, [si]
@@ -551,7 +657,6 @@ cmd_LOAD:
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintStringLn
-	jmp .cmdEnd
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -575,17 +680,17 @@ cmd_MEM:
 	jmp .cmdEnd
 	
 	.str1:
-		db '   Memory size,  1K blocks (up to 640K)  :  0x',0
+		db '   Memory size,  1K blocks (up to 640K)  :  $',0
 	.memsize:
 		db 0,0,0,0
 		db 0
 	.str2:
-		db '   Accessibles by the system             :  0x80 =0x40+0x40 [-2 bytes]',13
+		db '   Accessibles by the system             :  $80 =$40+$40 [-2 bytes]',13
 		db 13
-		db '   Lower memory size   (0000 - 7E00)     :  0x20',13
-		db '   System size         (7E00 - AA00)     :  0x0B',13
-		db '   BASIC program space (AA00 - 10000)    :  0x15',13
-		db '   Programs space      (10000 - 1FFFF)   :  0x40 [-2 bytes]',0
+		db '   Lower memory size   (0000 - 7E00)     :  $20',13
+		db '   System size         (7E00 - AA00)     :  $0B',13
+		db '   BASIC program space (AA00 - 10000)    :  $15',13
+		db '   Programs space      (10000 - 1FFFF)   :  $40 [-2 bytes]',0
 	
 	
 	.comm:
@@ -695,7 +800,7 @@ cmd_NEW:
 str_cmd_OFF:
 	db 'OFF',0
 str_cmdh_OFF:
-	db ' (?) Turns off the computer. Use "OFF +" to avoid prompting.',0
+	db ' (?) Turns off the computer. Use "OFF +" to avoid prompting. Use "OFF %" to reboot the system.',0
 cmd_OFF:
 	; Verificacion rutinaria
 	cmp bh, byte 0 ; Si el comando introducido no era OFF, terminar
@@ -711,11 +816,21 @@ cmd_OFF:
 	
 	.comm:
 	
-	
 	mov bh, byte '+' ; Sin preguntar
 	cmp bh, [_InputBuffer+4]
 	jz .exitgc
 	
+	mov bh, byte '%' ; Sin preguntar
+	cmp bh, [_InputBuffer+4]
+	jnz .offi
+	
+	; Reboot
+	call __ensure
+	cmp bl, byte 0
+	jnz .cmdEndG
+	int 19h
+	
+	.offi:
 	mov si, _str_cc_OFF
 	call PrintStringLn
 	
@@ -730,8 +845,7 @@ cmd_OFF:
 		cmp al, 13
 		jz .exitgc
 		
-		xor bx, bx ; Todo ok
-		jmp .cmdEnd
+		jmp .cmdEndG
 	.exitgc:
 	
 	mov si, _str_cc_OFF2
@@ -743,6 +857,7 @@ cmd_OFF:
 	
 	call _sys_shutdown
 	
+	.cmdEndG:
 	xor bx, bx ; Todo ok
 	.cmdEnd:
 	ret
@@ -789,7 +904,7 @@ cmd_PRE:
 str_cmd_PRG:
 	db 'PRG',0
 str_cmdh_PRG:
-	db ' (?) Load a compiled program file (*.prg) in 0x10000, and the runs it.',0
+	db ' (?) Load a compiled program file (*.prg) into 0x10000, and the runs it.',0
 cmd_PRG:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -803,16 +918,99 @@ cmd_PRG:
 	xor bx, bx
 	jmp .cmdEnd
 	
+	; vars
+	._c:	dw 0
+	
 	.comm:
-	mov si, 0x0000
-	mov al, byte 'H'
-	call ExtendedStore
 	
-	call ExtendedLoad
-	mov ah, 0x0e
-	xor bx, bx
-	int 0x10
+	mov bh, byte 0
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEnd
+	mov bh, 13 ; .cmd files
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEnd
 	
+	call _BRFS_ReadSectorCD
+	jc .cmdEndB
+	
+	; Buscar si existe
+	mov bl, 0x1c ; Fichero
+	mov si, _InputBuffer+4
+	call _BRFS_GetElementFromDir
+	jc .cmdEndB ; No existe
+	; Adress in DX
+	mov [._c], dh
+	mov [._c+1], dl
+	
+	mov bh, dh
+	mov bl, dl
+	call _BRFS_ReadSector
+	jc .cmdEndB
+	
+	mov di, 0x0000
+	.starti2:
+	mov si, _BRFS_TRS_
+	.loop:
+		cmp si, _BRFS_TRS_+510
+		jz .exitLoop
+		
+		mov al, byte [si]
+		push si
+		mov si, di
+		call ExtendedStore
+		pop si
+		
+		.next:
+		inc si
+		inc di
+		jmp .loop
+	.exitLoop:
+	; Verificar si hay más
+	
+	xor bh, bh
+	cmp bh, [si]
+	jnz .msg_leermas
+	cmp bh, [si+1]
+	jnz .msg_leermas
+	
+	; Transfer control
+	mov bx, 0xFFFF
+	mov di, 0x0001
+	mov es, bx
+	;call 0:
+	
+	
+	
+	jmp .cmdEndG
+	
+	
+	.msg_leermas:
+	xor bh, bh
+	cmp bh, [si]
+	jnz .leermas ; No es 0x0001
+	inc bh
+	cmp bh, [si+1]
+	jnz .leermas
+	
+	; Leermas1
+	mov bh, [._c]
+	mov bl, [._c+1]
+	inc bx
+	mov [._c], bh
+	mov [._c+1], bl
+	call _BRFS_ReadSector
+	jmp .starti2
+	
+	.leermas:
+	mov bh, [si]
+	mov bl, [si+1]
+	call _BRFS_ReadSector
+	jmp .starti2
+	
+	.cmdEndB:
+	mov si, _str_cc_unkPath
+	call PrintStringLn
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -864,9 +1062,9 @@ cmd_RTX:
 	jc .cmdEndB
 	
 	.starti2:
-	mov si, _BRFS_TMS_
+	mov si, _BRFS_TRS_
 	.loop:
-		cmp si, _BRFS_TMS_+510
+		cmp si, _BRFS_TRS_+510
 		jz .exitLoop
 		
 		; Ignorar hasta encontrar el siguiente
@@ -889,7 +1087,6 @@ cmd_RTX:
 		jmp .loop
 	.exitLoop:
 	; Verificar si hay más
-	call PrintLn
 	
 	xor bh, bh
 	cmp bh, [si]
@@ -901,29 +1098,17 @@ cmd_RTX:
 	
 	
 	.msg_leermas:
-	mov di, si
+	push si
 	call __more
+	pop si
 	cmp bl, byte 0
 	jnz .cmdEndG
 	
-	pusha
-	call GetCursorPos
-	sub dh, 2
-	xor dl, dl
-	call SetCursorPos
-	mov ah, 0x09
-	mov al, ' '
 	xor bh, bh
-	mov bl, [COLOR]
-	mov cx, 0x80
-	int 10h
-	popa
-	
-	xor bh, bh
-	cmp bh, [di]
+	cmp bh, [si]
 	jnz .leermas ; No es 0x0001
 	inc bh
-	cmp bh, [di+1]
+	cmp bh, [si+1]
 	jnz .leermas
 	
 	; Leermas1
@@ -936,16 +1121,16 @@ cmd_RTX:
 	jmp .starti2
 	
 	.leermas:
-	mov bh, [di]
-	mov bl, [di+1]
+	mov bh, [si]
+	mov bl, [si+1]
 	call _BRFS_ReadSector
 	jmp .starti2
 	
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintStringLn
-	jmp .cmdEnd
 	.cmdEndG:
+	call PrintLn
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -1043,9 +1228,9 @@ cmd_WTX:
 	
 	
 	.starti2:
-	mov si, _BRFS_TMS_
+	mov si, _BRFS_TRS_
 	.loop:
-		cmp si, _BRFS_TMS_+510
+		cmp si, _BRFS_TRS_+510
 		jz .exitLoop
 		
 		
@@ -1086,14 +1271,20 @@ __ensure:
 	call PrintLn
 	ret
 __more:
+	call GetCursorPos
+	mov dh, [_CursorRow]
+	mov dl, [_CursorCol]
+	push dx
+	
 	call PrintLn
 	mov si, _str__MORE
-	call PrintStringLn
+	call PrintString
 	
 	call GetChar
 	cmp al, 13
 	jz .exitgc
 	
+	pop dx ; Ojito con el stack
 	mov bl, 0x01 ; Ha pulsado otra tecla
 	jmp .end
 	
@@ -1101,16 +1292,19 @@ __more:
 	
 	; Mini Clear
 	call GetCursorPos
-	mov dh, [_CursorRow]
-	sub dh, 2
+	mov dh, byte [_CursorRow]
+	mov dl, byte [_CursorCol]
 	xor dl, dl
 	call SetCursorPos
 	mov ah, 0x09
 	mov al, ' '
 	xor bh, bh
-	mov bl, [COLOR]
+	mov bl, byte [COLOR]
 	mov cx, 0x80
 	int 10h
+	
+	pop dx
+	call SetCursorPos
 	
 	xor bl, bl ; GG
 	.end:
@@ -1135,8 +1329,13 @@ _str_cc_version:
 	db 13
 	db ' > BASIC Core           by Angel Ruiz Fernandez',13
 	db '   version 0.1          [aruizfernandez05@gmail.com]',13
+	db 13
+	db ' > Por sugerir          by Pablo Lamas Naranjo',13
+	db '   usar "OFF %"         [tontoman@gmail.com]',13
 	
 	db 0
+_str_cc_unsopportedf:
+	db 'Unsopported feature.',0
 _str__ensure:
 	db 'Sure? Press ENTER to confirm.',0
 _str__OK:

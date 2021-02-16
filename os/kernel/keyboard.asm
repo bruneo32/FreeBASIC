@@ -3,7 +3,11 @@ GetPromptString:
 	mov bx, _InputBuffer ; Direcction de inicio de _InputBuffer
 	
 	.strLoop:
+		push bx
+		push cx
 		call GetChar
+		pop cx
+		pop bx
 		
 		cmp al, 13 ; CR - Enter
 		jz .exitLoop
@@ -18,8 +22,8 @@ GetPromptString:
 		; Ojo con algunos caracteres
 		cmp al, 32 ; SPACE, todos los anteriores son caracteres de control
 		jb .continueLoop
-		cmp al, 126 ; ~, todos los siguiente
-		ja .continueLoop
+		cmp al, 0x7f ; DEL, todos los siguiente
+		jz .continueLoop
 		
 		; Display
 		mov ah, 0x0e
@@ -61,12 +65,61 @@ GetChar:
 	int 16h
 	jz GetChar
 	
+	xor bx,bx
+	mov cl, byte 3
+	.Aloop:
+	mov ah, 02h
+	int 16h
+	cmp al, 00001000b ; ALT
+	jnz .noALT
+		
+		; Limitar intentos
+		cmp cl, byte 0
+		jz .exitAloop
+		
+		; Obtener caracter
+		mov ah, 00h
+		int 16h
+		
+		; Verificar
+		cmp ah, 0x78 ; 1
+		jb .Aloop
+		cmp ah, 0x81 ; 0, after 9
+		ja .Aloop
+		
+		; Convertir
+		sub ah, 0x77
+		cmp ah, 0x0a
+		jb .next
+		xor ah,ah
+		
+		.next:
+		; Multiplicar por 10 y sumar
+		push ax
+		mov al, 10d
+		mul bl ; Return in AX
+		mov bx, ax
+		
+		pop ax
+		add bl, ah
+		
+		; Siguiente
+		dec cl
+		jmp .Aloop
+	.exitAloop:
+	; Guardar
+	
+	mov al, bl
+	jmp .end
+	
+	
+	.noALT:
 	mov ah, 00h
 	int 16h
 	
 	; Char stored in AL register
+	.end:
 	ret
-
 
 _InputBufferSize equ 300
 _InputBuffer:
