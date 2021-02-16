@@ -28,8 +28,10 @@ __SECRETGAME__:
 		mov ax, 0x0701 ; Hacia abajo, 1 row
 		mov bh, [COLOR]
 		xor bl, bl
-		xor cx, cx
-		mov dx, 0x2580
+		mov ch, byte [SafeRect]
+		mov cl, byte [SafeRect+1]
+		mov dh, byte [SafeRect+2]
+		mov dl, byte [SafeRect+3]
 		int 10h
 		ret
 	
@@ -55,10 +57,10 @@ __SECRETGAME__:
 		mov si, cx
 		call PrintString
 		
-		call .bajar
-		
 		mov cx, __SecretSleep__
 		call Sleep
+		
+		call .bajar
 		
 		pop cx
 		add cx, 14

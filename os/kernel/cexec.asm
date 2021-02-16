@@ -51,6 +51,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	COLOR
+	mov si, _InputBuffer
+	mov di, str_cmd_COLOR
+	call iStringCompareSpace
+	call cmd_COLOR
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	INF
 	mov si, _InputBuffer
 	mov di, str_cmd_INF

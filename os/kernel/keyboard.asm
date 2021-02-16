@@ -70,6 +70,7 @@ GetChar:
 	.Aloop:
 	mov ah, 02h
 	int 16h
+	and al, byte 00001000b
 	cmp al, 00001000b ; ALT
 	jnz .noALT
 		

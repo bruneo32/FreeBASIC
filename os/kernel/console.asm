@@ -1,23 +1,38 @@
-ConsoleClear:
-	;;; INPUT ;;;
-	; Color en [COLOR]
-	
+_con_clear:
 	; Clear
-	xor ah, ah ; Set video mode
-	mov al, [VideoMode]
-	int 10h
+	
+	; Fill with char ' '
+	mov al, ' '
+	mov bh, [COLOR]
+	mov ch, byte [SafeRect]
+	mov cl, byte [SafeRect+1]
+	mov dh, byte [SafeRect+2]
+	mov dl, byte [SafeRect+3]
+	call _AttrRect
+	
+	ret
+
+ConsoleClear:
+	; This is for commands in FreeBASIC
+	call _con_clear
 	
 	call _FillColor
 	
+	mov dh, byte [SafeRect]
+	mov dl, byte [SafeRect+1]
+	call SetCursorPos
+	
 	ret
+
 _FillColor:
 	
 	; Fill with color
-	mov ax, 0x0600 ; Clear screen
+	xor al,al
 	mov bh, [COLOR]
-	xor bl, bl
-	xor cx, cx
-	mov dx, 0x2580
-	int 10h
+	mov ch, byte [SafeRect]
+	mov cl, byte [SafeRect+1]
+	mov dh, byte [SafeRect+2]
+	mov dl, byte [SafeRect+3]
+	call _AttrRect
 	
 	ret

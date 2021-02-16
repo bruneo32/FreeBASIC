@@ -1,8 +1,8 @@
 ; Entry point
-Start:
+CustomConsole:
 	call ConsoleClear
 	
-	mov si, str_hello
+	mov si, str_welcome
 	call PrintStringLn
 	
 	; Return the control to the system
@@ -10,14 +10,18 @@ Start:
 
 ; System required variables
 COLOR:
+	; See "COLOR ?"
 	db 0x0f
-VideoMode:
-	db 0x03
+SafeRect:
+	;  ROW  COL
+	db 0x00,0x00 ; Top-left corner
+	db 0x25,0x80 ; Bottom-right corner
 str_pretext:
 	db ''
 	times 6-($-str_pretext) db 0
 	db 0
-	
+
 ; Custom variables
-str_hello:
-	db 'Welcome!',0
+str_welcome:
+	db 13,'   Welcome!',13
+	db 0

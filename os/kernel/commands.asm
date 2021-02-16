@@ -39,6 +39,11 @@ cmd_HELP:
 	mov si, str_cmds
 	call PrintStringLn
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -58,7 +63,7 @@ cmd_CAT:
 	mov si, str_cmdh_CAT
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	jmp .starti
@@ -176,6 +181,10 @@ cmd_CAT:
 	call _BRFS_ReadSector
 	jmp .starti2
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -196,7 +205,7 @@ cmd_CD:
 	mov si, str_cmdh_CD
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
@@ -221,9 +230,10 @@ cmd_CD:
 	
 	jmp .cmdEndG
 	
+	jmp .cmdEndG
 	.cmdEndB:
-	mov si, _str_cc_unkPath
-	call PrintStringLn
+	mov bx, word 1
+	ret
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -232,7 +242,17 @@ cmd_CD:
 str_cmd_CDT:
 	db 'CDT',0
 str_cmdh_CDT:
-	db ' (?) Watch the Current Date and Time.',0
+	db ' (?) Watch the Current Date and Time. ISO 8601 standard.',13
+	db 13
+	db ' FORMAT    : YYYY-MM-DD   HH:MM',13
+	db ' Example   : 2021-02-16   11:15',13
+	db ' Means:',13
+	db ' > Year    : 2021',13
+	db ' > Month   : 02 (February)',13
+	db ' > Day     : 16',13
+	db ' ',175,' Hours   : 11',13
+	db ' ',175,' Minutes : 15'
+	db 0
 cmd_CDT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -244,7 +264,7 @@ cmd_CDT:
 	mov si, str_cmdh_CDT
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
@@ -267,6 +287,11 @@ cmd_CDT:
 	
 	call PrintLn
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -286,12 +311,93 @@ cmd_CLS:
 	mov si, str_cmdh_CLS
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
 	call ConsoleClear
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_COLOR:
+	db 'COLOR',0
+str_cmdh_COLOR:
+	db ' (?) Set a color attribute for the console output.',13
+	db 13
+	db '  0 = Black       8 = Gray',13
+	db '  1 = Blue        9 = Light Blue',13
+	db '  2 = Green       A = Light Green',13
+	db '  3 = Aqua        B = Light Aqua',13
+	db '  4 = Red         C = Light Red',13
+	db '  5 = Purple      D = Light Purple',13
+	db '  6 = Yellow      E = Light Yellow',13
+	db '  7 = White       F = Bright White',13
+	db 13
+	db '  > First digit  : Background color',13
+	db '  > Second digit : Foreground color',13
+	db '  Example:  COLOR 1F, produces bright white foreground over a blue background.'
+	db 0
+cmd_COLOR:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+6]
+	jnz .comm
+	mov si, str_cmdh_COLOR
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.comm:
+	
+	mov bh, byte [_InputBuffer+6]
+	mov bl, byte [_InputBuffer+7]
+	
+	cmp bh, byte 0
+	jz .cmdEndB
+	cmp bl, byte 0
+	jz .cmdEndB
+	cmp bh, 0x30 ; '0'
+	jl .cmdEndB
+	cmp bh, 0x46 ; 'F'
+	jg .cmdEndB
+	cmp bl, 0x30 ; '0'
+	jl .cmdEndB
+	cmp bl, 0x46 ; 'F'
+	jg .cmdEndB
+	
+	sub bh, byte '0'
+	sub bl, byte '0'
+	
+	cmp bh, 0x09
+	jge .next1
+	sub bh, 0x07
+	.next1:
+	cmp bl, 0x09
+	jge .next2
+	sub bl, 0x07
+	.next2:
+	
+	shl bh, 4
+	or bh, bl
+	mov [COLOR], bh
+	
+	call _FillColor
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -299,7 +405,7 @@ cmd_CLS:
 str_cmd_EMP:
 	db 'EMP',0
 str_cmdh_EMP:
-	db ' (?) Hace literalmente nada. xD',0
+	db ' (?) Does literally nothing. xD',0
 cmd_EMP:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -311,12 +417,19 @@ cmd_EMP:
 	mov si, str_cmdh_EMP
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
+	
 	; ABSOLUTAMENTE NADA XD
 	
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -336,7 +449,7 @@ cmd_INF:
 	mov si, str_cmdh_INF
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
@@ -348,6 +461,12 @@ cmd_INF:
 	mov si, _InputBuffer+4
 	call cmd_INF_holder
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
+	xor bx, bx
 	.cmdEnd:
 	ret
 
@@ -366,7 +485,7 @@ cmd_INFD:
 	mov si, str_cmdh_INFD
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
@@ -378,6 +497,12 @@ cmd_INFD:
 	mov si, _InputBuffer+5
 	call cmd_INF_holder
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
+	xor bx, bx
 	.cmdEnd:
 	ret
 
@@ -545,13 +670,18 @@ cmd_LIST:
 	mov si, str_cmdh_LIST
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
 	mov si, _InputBuffer+5
 	call MIT_LIST
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -571,7 +701,7 @@ cmd_LOAD:
 	mov si, str_cmdh_RTX
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	; vars
 	._c:	dw 0
@@ -677,7 +807,7 @@ cmd_MEM:
 	mov si, str_cmdh_MEM
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.str1:
 		db '   Memory size,  1K blocks (up to 640K)  :  $',0
@@ -742,6 +872,11 @@ cmd_MEM:
 	
 	popa
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -761,7 +896,7 @@ cmd_NEW:
 	mov si, str_cmdh_NEW
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	xor bx, bx
@@ -793,6 +928,11 @@ cmd_NEW:
 	.exitLoop:
 	mov [BasicProgramCounter], word BasicSpace
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -800,7 +940,9 @@ cmd_NEW:
 str_cmd_OFF:
 	db 'OFF',0
 str_cmdh_OFF:
-	db ' (?) Turns off the computer. Use "OFF +" to avoid prompting. Use "OFF %" to reboot the system.',0
+	db ' (?) Turns off the computer. Use "OFF +" to avoid prompting.',13
+	db '     Type "OFF %" to reboot the system. Depending on your BIOS, you may have to perform some actions to reboot.'
+	db 0
 cmd_OFF:
 	; Verificacion rutinaria
 	cmp bh, byte 0 ; Si el comando introducido no era OFF, terminar
@@ -812,7 +954,7 @@ cmd_OFF:
 	mov si, str_cmdh_OFF
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
@@ -857,8 +999,12 @@ cmd_OFF:
 	
 	call _sys_shutdown
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
 	.cmdEndG:
-	xor bx, bx ; Todo ok
+	xor bx, bx
 	.cmdEnd:
 	ret
 
@@ -877,7 +1023,7 @@ cmd_PRE:
 	mov si, str_cmdh_PRE
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
@@ -897,6 +1043,11 @@ cmd_PRE:
 		jmp .loop
 	.exitLoop:
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -916,7 +1067,7 @@ cmd_PRG:
 	mov si, str_cmdh_PRG
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	; vars
 	._c:	dw 0
@@ -1030,7 +1181,7 @@ cmd_RTX:
 	mov si, str_cmdh_RTX
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	; vars
 	._c:	dw 0
@@ -1150,13 +1301,18 @@ cmd_RUN:
 	mov si, str_cmdh_RUN
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
 	mov si, BasicSpace
 	call MIT_INTERPRET
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -1176,7 +1332,7 @@ cmd_VER:
 	mov si, str_cmdh_VER
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	.comm:
 	
@@ -1184,6 +1340,11 @@ cmd_VER:
 	mov si, _str_cc_version
 	call PrintStringLn
 	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bx, word 1
+	ret
+	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -1203,7 +1364,7 @@ cmd_WTX:
 	mov si, str_cmdh_WTX
 	call PrintStringLn
 	xor bx, bx
-	jmp .cmdEnd
+	ret
 	
 	; vars
 	._c:	dw 0
@@ -1293,14 +1454,21 @@ __more:
 	; Mini Clear
 	call GetCursorPos
 	mov dh, byte [_CursorRow]
-	mov dl, byte [_CursorCol]
-	xor dl, dl
+	mov dl, byte [SafeRect+1]
 	call SetCursorPos
 	mov ah, 0x09
 	mov al, ' '
+	
+	xor cx,cx
+	xor bh,bh
+	mov bl, byte [SafeRect+3]
+	add cx, bx
+	xor bh,bh
+	mov bl, byte [SafeRect+1]
+	sub cx, bx
+	
 	xor bh, bh
 	mov bl, byte [COLOR]
-	mov cx, 0x80
 	int 10h
 	
 	pop dx
@@ -1329,10 +1497,6 @@ _str_cc_version:
 	db 13
 	db ' > BASIC Core           by Angel Ruiz Fernandez',13
 	db '   version 0.1          [aruizfernandez05@gmail.com]',13
-	db 13
-	db ' > Por sugerir          by Pablo Lamas Naranjo',13
-	db '   usar "OFF %"         [tontoman@gmail.com]',13
-	
 	db 0
 _str_cc_unsopportedf:
 	db 'Unsopported feature.',0
