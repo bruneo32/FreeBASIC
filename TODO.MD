@@ -4,6 +4,10 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
+- Borrar linea en BASIC
+- Comando de archivos
+- Comandos de disco
+- BRFS de 4GB
 - TEMPLATES
 
 # Done
