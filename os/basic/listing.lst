@@ -1,5 +1,5 @@
 
-interpret:     file format elf32-i386
+core:     file format elf32-i386
 
 
 Disassembly of section .text:
@@ -17,7 +17,7 @@ Disassembly of section .text:
 
 00009e2a <_interpret>:
     9e2a:	89 36 32 9e          	mov    WORD PTR ds:0x9e32,si
-    9e2e:	e8 de 04             	call   a30f <interpret>
+    9e2e:	e8 9e 04             	call   a2cf <interpret>
     9e31:	c3                   	ret    
 
 00009e32 <kernarg>:
@@ -33,7 +33,7 @@ Disassembly of section .text:
 
 00009e3c <PrintString>:
     9e3c:	89 e3                	mov    bx,sp
-    9e3e:	8b 77 fe             	mov    si,WORD PTR [bx-0x2]
+    9e3e:	8b 77 02             	mov    si,WORD PTR [bx+0x2]
     9e41:	ff 16 00 7f          	call   WORD PTR ds:0x7f00
     9e45:	c3                   	ret    
 
@@ -43,7 +43,7 @@ Disassembly of section .text:
 
 00009e4b <PrintStringLn>:
     9e4b:	89 e3                	mov    bx,sp
-    9e4d:	8b 77 fe             	mov    si,WORD PTR [bx-0x2]
+    9e4d:	8b 77 02             	mov    si,WORD PTR [bx+0x2]
     9e50:	ff 16 04 7f          	call   WORD PTR ds:0x7f04
     9e54:	c3                   	ret    
 
@@ -69,286 +69,286 @@ Disassembly of section .text:
 
 00009e71 <ExtendedStore>:
     9e71:	89 e3                	mov    bx,sp
-    9e73:	8b 77 fc             	mov    si,WORD PTR [bx-0x4]
-    9e76:	89 e3                	mov    bx,sp
-    9e78:	30 c0                	xor    al,al
-    9e7a:	8a 47 fe             	mov    al,BYTE PTR [bx-0x2]
-    9e7d:	ff 16 10 7f          	call   WORD PTR ds:0x7f10
-    9e81:	c3                   	ret    
+    9e73:	8b 77 02             	mov    si,WORD PTR [bx+0x2]
+    9e76:	30 e4                	xor    ah,ah
+    9e78:	8a 47 04             	mov    al,BYTE PTR [bx+0x4]
+    9e7b:	ff 16 10 7f          	call   WORD PTR ds:0x7f10
+    9e7f:	c3                   	ret    
 
-00009e82 <ExtendedRead>:
-    9e82:	89 e3                	mov    bx,sp
-    9e84:	8b 77 fe             	mov    si,WORD PTR [bx-0x2]
-    9e87:	ff 16 12 7f          	call   WORD PTR ds:0x7f12
-    9e8b:	30 e4                	xor    ah,ah
-    9e8d:	c3                   	ret    
+00009e80 <ExtendedLoad>:
+    9e80:	89 e3                	mov    bx,sp
+    9e82:	8b 77 02             	mov    si,WORD PTR [bx+0x2]
+    9e85:	ff 16 12 7f          	call   WORD PTR ds:0x7f12
+    9e89:	30 e4                	xor    ah,ah
+    9e8b:	c3                   	ret    
 
-00009e8e <memcpy>:
-    9e8e:	57                   	push   di
-    9e8f:	55                   	push   bp
-    9e90:	89 e5                	mov    bp,sp
-    9e92:	83 ec 02             	sub    sp,0x2
-    9e95:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
-    9e9a:	eb 1f                	jmp    9ebb <memcpy+0x2d>
-    9e9c:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9e9f:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
-    9ea2:	01 c2                	add    dx,ax
-    9ea4:	89 d3                	mov    bx,dx
-    9ea6:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9ea9:	8b 56 08             	mov    dx,WORD PTR [bp+0x8]
-    9eac:	01 c2                	add    dx,ax
-    9eae:	89 d7                	mov    di,dx
-    9eb0:	8a 05                	mov    al,BYTE PTR [di]
-    9eb2:	88 07                	mov    BYTE PTR [bx],al
-    9eb4:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9eb7:	40                   	inc    ax
-    9eb8:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
-    9ebb:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9ebe:	3b 46 0a             	cmp    ax,WORD PTR [bp+0xa]
-    9ec1:	3b 46 0a             	cmp    ax,WORD PTR [bp+0xa]
-    9ec4:	72 d6                	jb     9e9c <memcpy+0xe>
-    9ec6:	8b 46 06             	mov    ax,WORD PTR [bp+0x6]
+00009e8c <memcpy>:
+    9e8c:	57                   	push   di
+    9e8d:	55                   	push   bp
+    9e8e:	89 e5                	mov    bp,sp
+    9e90:	83 ec 02             	sub    sp,0x2
+    9e93:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
+    9e98:	eb 1f                	jmp    9eb9 <memcpy+0x2d>
+    9e9a:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9e9d:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
+    9ea0:	01 c2                	add    dx,ax
+    9ea2:	89 d3                	mov    bx,dx
+    9ea4:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9ea7:	8b 56 08             	mov    dx,WORD PTR [bp+0x8]
+    9eaa:	01 c2                	add    dx,ax
+    9eac:	89 d7                	mov    di,dx
+    9eae:	8a 05                	mov    al,BYTE PTR [di]
+    9eb0:	88 07                	mov    BYTE PTR [bx],al
+    9eb2:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9eb5:	40                   	inc    ax
+    9eb6:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
+    9eb9:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9ebc:	3b 46 0a             	cmp    ax,WORD PTR [bp+0xa]
+    9ebf:	3b 46 0a             	cmp    ax,WORD PTR [bp+0xa]
+    9ec2:	72 d6                	jb     9e9a <memcpy+0xe>
+    9ec4:	8b 46 06             	mov    ax,WORD PTR [bp+0x6]
+    9ec7:	89 c0                	mov    ax,ax
     9ec9:	89 c0                	mov    ax,ax
-    9ecb:	89 c0                	mov    ax,ax
-    9ecd:	89 ec                	mov    sp,bp
-    9ecf:	5d                   	pop    bp
-    9ed0:	5f                   	pop    di
-    9ed1:	16                   	push   ss
-    9ed2:	1f                   	pop    ds
-    9ed3:	c3                   	ret    
+    9ecb:	89 ec                	mov    sp,bp
+    9ecd:	5d                   	pop    bp
+    9ece:	5f                   	pop    di
+    9ecf:	16                   	push   ss
+    9ed0:	1f                   	pop    ds
+    9ed1:	c3                   	ret    
 
-00009ed4 <strncpy>:
-    9ed4:	57                   	push   di
-    9ed5:	55                   	push   bp
-    9ed6:	89 e5                	mov    bp,sp
-    9ed8:	83 ec 02             	sub    sp,0x2
-    9edb:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
-    9ee0:	eb 1f                	jmp    9f01 <strncpy+0x2d>
-    9ee2:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9ee5:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
-    9ee8:	01 c2                	add    dx,ax
-    9eea:	89 d3                	mov    bx,dx
-    9eec:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9eef:	8b 56 08             	mov    dx,WORD PTR [bp+0x8]
-    9ef2:	01 c2                	add    dx,ax
-    9ef4:	89 d7                	mov    di,dx
-    9ef6:	8a 05                	mov    al,BYTE PTR [di]
-    9ef8:	88 07                	mov    BYTE PTR [bx],al
-    9efa:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9efd:	40                   	inc    ax
-    9efe:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
-    9f01:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9f04:	3b 46 0a             	cmp    ax,WORD PTR [bp+0xa]
-    9f07:	3b 46 0a             	cmp    ax,WORD PTR [bp+0xa]
-    9f0a:	72 d6                	jb     9ee2 <strncpy+0xe>
-    9f0c:	90                   	nop
-    9f0d:	89 ec                	mov    sp,bp
-    9f0f:	5d                   	pop    bp
-    9f10:	5f                   	pop    di
-    9f11:	16                   	push   ss
-    9f12:	1f                   	pop    ds
-    9f13:	c3                   	ret    
+00009ed2 <strncpy>:
+    9ed2:	57                   	push   di
+    9ed3:	55                   	push   bp
+    9ed4:	89 e5                	mov    bp,sp
+    9ed6:	83 ec 02             	sub    sp,0x2
+    9ed9:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
+    9ede:	eb 1f                	jmp    9eff <strncpy+0x2d>
+    9ee0:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9ee3:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
+    9ee6:	01 c2                	add    dx,ax
+    9ee8:	89 d3                	mov    bx,dx
+    9eea:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9eed:	8b 56 08             	mov    dx,WORD PTR [bp+0x8]
+    9ef0:	01 c2                	add    dx,ax
+    9ef2:	89 d7                	mov    di,dx
+    9ef4:	8a 05                	mov    al,BYTE PTR [di]
+    9ef6:	88 07                	mov    BYTE PTR [bx],al
+    9ef8:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9efb:	40                   	inc    ax
+    9efc:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
+    9eff:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9f02:	3b 46 0a             	cmp    ax,WORD PTR [bp+0xa]
+    9f05:	3b 46 0a             	cmp    ax,WORD PTR [bp+0xa]
+    9f08:	72 d6                	jb     9ee0 <strncpy+0xe>
+    9f0a:	90                   	nop
+    9f0b:	89 ec                	mov    sp,bp
+    9f0d:	5d                   	pop    bp
+    9f0e:	5f                   	pop    di
+    9f0f:	16                   	push   ss
+    9f10:	1f                   	pop    ds
+    9f11:	c3                   	ret    
 
-00009f14 <strchr>:
-    9f14:	55                   	push   bp
-    9f15:	89 e5                	mov    bp,sp
-    9f17:	83 ec 02             	sub    sp,0x2
-    9f1a:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
-    9f1f:	eb 1e                	jmp    9f3f <strchr+0x2b>
-    9f21:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
-    9f24:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9f27:	01 c2                	add    dx,ax
-    9f29:	89 d3                	mov    bx,dx
-    9f2b:	8a 07                	mov    al,BYTE PTR [bx]
-    9f2d:	3c 01                	cmp    al,0x1
-    9f2f:	20 c0                	and    al,al
-    9f31:	75 05                	jne    9f38 <strchr+0x24>
-    9f33:	b8 00 00             	mov    ax,0x0
-    9f36:	eb 23                	jmp    9f5b <strchr+0x47>
-    9f38:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9f3b:	40                   	inc    ax
-    9f3c:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
-    9f3f:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
-    9f42:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9f45:	01 c2                	add    dx,ax
-    9f47:	89 d3                	mov    bx,dx
-    9f49:	8a 07                	mov    al,BYTE PTR [bx]
-    9f4b:	3a 46 06             	cmp    al,BYTE PTR [bp+0x6]
-    9f4e:	3a 46 06             	cmp    al,BYTE PTR [bp+0x6]
-    9f51:	75 ce                	jne    9f21 <strchr+0xd>
-    9f53:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
-    9f56:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9f59:	01 d0                	add    ax,dx
+00009f12 <strchr>:
+    9f12:	55                   	push   bp
+    9f13:	89 e5                	mov    bp,sp
+    9f15:	83 ec 02             	sub    sp,0x2
+    9f18:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
+    9f1d:	eb 1e                	jmp    9f3d <strchr+0x2b>
+    9f1f:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
+    9f22:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9f25:	01 c2                	add    dx,ax
+    9f27:	89 d3                	mov    bx,dx
+    9f29:	8a 07                	mov    al,BYTE PTR [bx]
+    9f2b:	3c 01                	cmp    al,0x1
+    9f2d:	20 c0                	and    al,al
+    9f2f:	75 05                	jne    9f36 <strchr+0x24>
+    9f31:	b8 00 00             	mov    ax,0x0
+    9f34:	eb 23                	jmp    9f59 <strchr+0x47>
+    9f36:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9f39:	40                   	inc    ax
+    9f3a:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
+    9f3d:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
+    9f40:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9f43:	01 c2                	add    dx,ax
+    9f45:	89 d3                	mov    bx,dx
+    9f47:	8a 07                	mov    al,BYTE PTR [bx]
+    9f49:	3a 46 06             	cmp    al,BYTE PTR [bp+0x6]
+    9f4c:	3a 46 06             	cmp    al,BYTE PTR [bp+0x6]
+    9f4f:	75 ce                	jne    9f1f <strchr+0xd>
+    9f51:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
+    9f54:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9f57:	01 d0                	add    ax,dx
+    9f59:	89 c0                	mov    ax,ax
     9f5b:	89 c0                	mov    ax,ax
-    9f5d:	89 c0                	mov    ax,ax
-    9f5f:	89 ec                	mov    sp,bp
-    9f61:	5d                   	pop    bp
-    9f62:	16                   	push   ss
-    9f63:	1f                   	pop    ds
-    9f64:	c3                   	ret    
+    9f5d:	89 ec                	mov    sp,bp
+    9f5f:	5d                   	pop    bp
+    9f60:	16                   	push   ss
+    9f61:	1f                   	pop    ds
+    9f62:	c3                   	ret    
 
-00009f65 <strspn>:
-    9f65:	55                   	push   bp
-    9f66:	89 e5                	mov    bp,sp
-    9f68:	83 ec 08             	sub    sp,0x8
-    9f6b:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
-    9f70:	c7 46 fc 00 00       	mov    WORD PTR [bp-0x4],0x0
-    9f75:	c6 46 fb 00          	mov    BYTE PTR [bp-0x5],0x0
-    9f79:	eb 67                	jmp    9fe2 <strspn+0x7d>
-    9f7b:	c7 46 f8 00 00       	mov    WORD PTR [bp-0x8],0x0
-    9f80:	c6 46 fb 00          	mov    BYTE PTR [bp-0x5],0x0
-    9f84:	eb 2b                	jmp    9fb1 <strspn+0x4c>
-    9f86:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
-    9f89:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    9f8c:	01 c2                	add    dx,ax
-    9f8e:	89 d3                	mov    bx,dx
-    9f90:	8a 0f                	mov    cl,BYTE PTR [bx]
-    9f92:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
-    9f95:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
-    9f98:	01 c2                	add    dx,ax
-    9f9a:	89 d3                	mov    bx,dx
-    9f9c:	8a 07                	mov    al,BYTE PTR [bx]
+00009f63 <strspn>:
+    9f63:	55                   	push   bp
+    9f64:	89 e5                	mov    bp,sp
+    9f66:	83 ec 08             	sub    sp,0x8
+    9f69:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
+    9f6e:	c7 46 fc 00 00       	mov    WORD PTR [bp-0x4],0x0
+    9f73:	c6 46 fb 00          	mov    BYTE PTR [bp-0x5],0x0
+    9f77:	eb 67                	jmp    9fe0 <strspn+0x7d>
+    9f79:	c7 46 f8 00 00       	mov    WORD PTR [bp-0x8],0x0
+    9f7e:	c6 46 fb 00          	mov    BYTE PTR [bp-0x5],0x0
+    9f82:	eb 2b                	jmp    9faf <strspn+0x4c>
+    9f84:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
+    9f87:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    9f8a:	01 c2                	add    dx,ax
+    9f8c:	89 d3                	mov    bx,dx
+    9f8e:	8a 0f                	mov    cl,BYTE PTR [bx]
+    9f90:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
+    9f93:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    9f96:	01 c2                	add    dx,ax
+    9f98:	89 d3                	mov    bx,dx
+    9f9a:	8a 07                	mov    al,BYTE PTR [bx]
+    9f9c:	38 c1                	cmp    cl,al
     9f9e:	38 c1                	cmp    cl,al
-    9fa0:	38 c1                	cmp    cl,al
-    9fa2:	75 06                	jne    9faa <strspn+0x45>
-    9fa4:	c6 46 fb 01          	mov    BYTE PTR [bp-0x5],0x1
-    9fa8:	eb 19                	jmp    9fc3 <strspn+0x5e>
-    9faa:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
-    9fad:	40                   	inc    ax
-    9fae:	89 46 f8             	mov    WORD PTR [bp-0x8],ax
-    9fb1:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
-    9fb4:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
-    9fb7:	01 c2                	add    dx,ax
-    9fb9:	89 d3                	mov    bx,dx
-    9fbb:	8a 07                	mov    al,BYTE PTR [bx]
-    9fbd:	3c 01                	cmp    al,0x1
-    9fbf:	20 c0                	and    al,al
-    9fc1:	75 c3                	jne    9f86 <strspn+0x21>
-    9fc3:	80 7e fb 01          	cmp    BYTE PTR [bp-0x5],0x1
-    9fc7:	80 7e fb 00          	cmp    BYTE PTR [bp-0x5],0x0
-    9fcb:	74 09                	je     9fd6 <strspn+0x71>
-    9fcd:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9fd0:	40                   	inc    ax
-    9fd1:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
-    9fd4:	eb 05                	jmp    9fdb <strspn+0x76>
-    9fd6:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    9fd9:	eb 1c                	jmp    9ff7 <strspn+0x92>
-    9fdb:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    9fde:	40                   	inc    ax
-    9fdf:	89 46 fc             	mov    WORD PTR [bp-0x4],ax
-    9fe2:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
-    9fe5:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    9fe8:	01 c2                	add    dx,ax
-    9fea:	89 d3                	mov    bx,dx
-    9fec:	8a 07                	mov    al,BYTE PTR [bx]
-    9fee:	3c 01                	cmp    al,0x1
-    9ff0:	20 c0                	and    al,al
-    9ff2:	75 87                	jne    9f7b <strspn+0x16>
-    9ff4:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9fa0:	75 06                	jne    9fa8 <strspn+0x45>
+    9fa2:	c6 46 fb 01          	mov    BYTE PTR [bp-0x5],0x1
+    9fa6:	eb 19                	jmp    9fc1 <strspn+0x5e>
+    9fa8:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    9fab:	40                   	inc    ax
+    9fac:	89 46 f8             	mov    WORD PTR [bp-0x8],ax
+    9faf:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
+    9fb2:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    9fb5:	01 c2                	add    dx,ax
+    9fb7:	89 d3                	mov    bx,dx
+    9fb9:	8a 07                	mov    al,BYTE PTR [bx]
+    9fbb:	3c 01                	cmp    al,0x1
+    9fbd:	20 c0                	and    al,al
+    9fbf:	75 c3                	jne    9f84 <strspn+0x21>
+    9fc1:	80 7e fb 01          	cmp    BYTE PTR [bp-0x5],0x1
+    9fc5:	80 7e fb 00          	cmp    BYTE PTR [bp-0x5],0x0
+    9fc9:	74 09                	je     9fd4 <strspn+0x71>
+    9fcb:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9fce:	40                   	inc    ax
+    9fcf:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
+    9fd2:	eb 05                	jmp    9fd9 <strspn+0x76>
+    9fd4:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9fd7:	eb 1c                	jmp    9ff5 <strspn+0x92>
+    9fd9:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    9fdc:	40                   	inc    ax
+    9fdd:	89 46 fc             	mov    WORD PTR [bp-0x4],ax
+    9fe0:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
+    9fe3:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    9fe6:	01 c2                	add    dx,ax
+    9fe8:	89 d3                	mov    bx,dx
+    9fea:	8a 07                	mov    al,BYTE PTR [bx]
+    9fec:	3c 01                	cmp    al,0x1
+    9fee:	20 c0                	and    al,al
+    9ff0:	75 87                	jne    9f79 <strspn+0x16>
+    9ff2:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    9ff5:	89 c0                	mov    ax,ax
     9ff7:	89 c0                	mov    ax,ax
-    9ff9:	89 c0                	mov    ax,ax
-    9ffb:	89 ec                	mov    sp,bp
-    9ffd:	5d                   	pop    bp
-    9ffe:	16                   	push   ss
-    9fff:	1f                   	pop    ds
-    a000:	c3                   	ret    
+    9ff9:	89 ec                	mov    sp,bp
+    9ffb:	5d                   	pop    bp
+    9ffc:	16                   	push   ss
+    9ffd:	1f                   	pop    ds
+    9ffe:	c3                   	ret    
 
-0000a001 <atoin>:
-    a001:	55                   	push   bp
-    a002:	89 e5                	mov    bp,sp
-    a004:	83 ec 04             	sub    sp,0x4
-    a007:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
-    a00c:	c7 46 fc 00 00       	mov    WORD PTR [bp-0x4],0x0
-    a011:	eb 31                	jmp    a044 <atoin+0x43>
-    a013:	8b 56 fe             	mov    dx,WORD PTR [bp-0x2]
-    a016:	89 d0                	mov    ax,dx
+00009fff <atoin>:
+    9fff:	55                   	push   bp
+    a000:	89 e5                	mov    bp,sp
+    a002:	83 ec 04             	sub    sp,0x4
+    a005:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
+    a00a:	c7 46 fc 00 00       	mov    WORD PTR [bp-0x4],0x0
+    a00f:	eb 31                	jmp    a042 <atoin+0x43>
+    a011:	8b 56 fe             	mov    dx,WORD PTR [bp-0x2]
+    a014:	89 d0                	mov    ax,dx
+    a016:	01 c0                	add    ax,ax
     a018:	01 c0                	add    ax,ax
-    a01a:	01 c0                	add    ax,ax
-    a01c:	89 c0                	mov    ax,ax
-    a01e:	01 d0                	add    ax,dx
-    a020:	d1 e0                	shl    ax,1
-    a022:	89 c0                	mov    ax,ax
-    a024:	89 c1                	mov    cx,ax
-    a026:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    a029:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
-    a02c:	01 c2                	add    dx,ax
-    a02e:	89 d3                	mov    bx,dx
-    a030:	8a 07                	mov    al,BYTE PTR [bx]
-    a032:	88 c0                	mov    al,al
-    a034:	98                   	cbw    
-    a035:	01 c8                	add    ax,cx
-    a037:	83 c0 d0             	add    ax,0xffd0
-    a03a:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
-    a03d:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    a040:	40                   	inc    ax
-    a041:	89 46 fc             	mov    WORD PTR [bp-0x4],ax
-    a044:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    a047:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
-    a04a:	01 c2                	add    dx,ax
-    a04c:	89 d3                	mov    bx,dx
-    a04e:	8a 07                	mov    al,BYTE PTR [bx]
-    a050:	3c 01                	cmp    al,0x1
-    a052:	20 c0                	and    al,al
-    a054:	74 0b                	je     a061 <atoin+0x60>
-    a056:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    a059:	3b 46 06             	cmp    ax,WORD PTR [bp+0x6]
-    a05c:	3b 46 06             	cmp    ax,WORD PTR [bp+0x6]
-    a05f:	72 b2                	jb     a013 <atoin+0x12>
-    a061:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a01a:	89 c0                	mov    ax,ax
+    a01c:	01 d0                	add    ax,dx
+    a01e:	d1 e0                	shl    ax,1
+    a020:	89 c0                	mov    ax,ax
+    a022:	89 c1                	mov    cx,ax
+    a024:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    a027:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
+    a02a:	01 c2                	add    dx,ax
+    a02c:	89 d3                	mov    bx,dx
+    a02e:	8a 07                	mov    al,BYTE PTR [bx]
+    a030:	88 c0                	mov    al,al
+    a032:	98                   	cbw    
+    a033:	01 c8                	add    ax,cx
+    a035:	83 c0 d0             	add    ax,0xffd0
+    a038:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
+    a03b:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    a03e:	40                   	inc    ax
+    a03f:	89 46 fc             	mov    WORD PTR [bp-0x4],ax
+    a042:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    a045:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
+    a048:	01 c2                	add    dx,ax
+    a04a:	89 d3                	mov    bx,dx
+    a04c:	8a 07                	mov    al,BYTE PTR [bx]
+    a04e:	3c 01                	cmp    al,0x1
+    a050:	20 c0                	and    al,al
+    a052:	74 0b                	je     a05f <atoin+0x60>
+    a054:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    a057:	3b 46 06             	cmp    ax,WORD PTR [bp+0x6]
+    a05a:	3b 46 06             	cmp    ax,WORD PTR [bp+0x6]
+    a05d:	72 b2                	jb     a011 <atoin+0x12>
+    a05f:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a062:	89 c0                	mov    ax,ax
     a064:	89 c0                	mov    ax,ax
-    a066:	89 c0                	mov    ax,ax
-    a068:	89 ec                	mov    sp,bp
-    a06a:	5d                   	pop    bp
-    a06b:	16                   	push   ss
-    a06c:	1f                   	pop    ds
-    a06d:	c3                   	ret    
+    a066:	89 ec                	mov    sp,bp
+    a068:	5d                   	pop    bp
+    a069:	16                   	push   ss
+    a06a:	1f                   	pop    ds
+    a06b:	c3                   	ret    
 
-0000a06e <extmemread>:
-    a06e:	57                   	push   di
-    a06f:	55                   	push   bp
-    a070:	89 e5                	mov    bp,sp
-    a072:	83 ec 02             	sub    sp,0x2
-    a075:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
-    a07a:	eb 25                	jmp    a0a1 <extmemread+0x33>
-    a07c:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
-    a07f:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    a082:	01 c2                	add    dx,ax
-    a084:	89 d7                	mov    di,dx
-    a086:	8b 56 0a             	mov    dx,WORD PTR [bp+0xa]
-    a089:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    a08c:	01 d0                	add    ax,dx
-    a08e:	50                   	push   ax
-    a08f:	16                   	push   ss
-    a090:	1f                   	pop    ds
-    a091:	e8 ee fd             	call   9e82 <ExtendedRead>
-    a094:	83 c4 02             	add    sp,0x2
-    a097:	36 88 05             	mov    BYTE PTR ss:[di],al
-    a09a:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    a09d:	40                   	inc    ax
-    a09e:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
-    a0a1:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    a0a4:	3b 46 08             	cmp    ax,WORD PTR [bp+0x8]
-    a0a7:	3b 46 08             	cmp    ax,WORD PTR [bp+0x8]
-    a0aa:	72 d0                	jb     a07c <extmemread+0xe>
-    a0ac:	90                   	nop
-    a0ad:	89 ec                	mov    sp,bp
-    a0af:	5d                   	pop    bp
-    a0b0:	5f                   	pop    di
-    a0b1:	16                   	push   ss
-    a0b2:	1f                   	pop    ds
-    a0b3:	c3                   	ret    
+0000a06c <extmemread>:
+    a06c:	57                   	push   di
+    a06d:	55                   	push   bp
+    a06e:	89 e5                	mov    bp,sp
+    a070:	83 ec 02             	sub    sp,0x2
+    a073:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
+    a078:	eb 25                	jmp    a09f <extmemread+0x33>
+    a07a:	8b 56 06             	mov    dx,WORD PTR [bp+0x6]
+    a07d:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a080:	01 c2                	add    dx,ax
+    a082:	89 d7                	mov    di,dx
+    a084:	8b 56 0a             	mov    dx,WORD PTR [bp+0xa]
+    a087:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a08a:	01 d0                	add    ax,dx
+    a08c:	50                   	push   ax
+    a08d:	16                   	push   ss
+    a08e:	1f                   	pop    ds
+    a08f:	e8 ee fd             	call   9e80 <ExtendedLoad>
+    a092:	83 c4 02             	add    sp,0x2
+    a095:	36 88 05             	mov    BYTE PTR ss:[di],al
+    a098:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a09b:	40                   	inc    ax
+    a09c:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
+    a09f:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a0a2:	3b 46 08             	cmp    ax,WORD PTR [bp+0x8]
+    a0a5:	3b 46 08             	cmp    ax,WORD PTR [bp+0x8]
+    a0a8:	72 d0                	jb     a07a <extmemread+0xe>
+    a0aa:	90                   	nop
+    a0ab:	89 ec                	mov    sp,bp
+    a0ad:	5d                   	pop    bp
+    a0ae:	5f                   	pop    di
+    a0af:	16                   	push   ss
+    a0b0:	1f                   	pop    ds
+    a0b1:	c3                   	ret    
 
-0000a0b4 <extmemwrite>:
-    a0b4:	55                   	push   bp
-    a0b5:	89 e5                	mov    bp,sp
-    a0b7:	83 ec 02             	sub    sp,0x2
-    a0ba:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
-    a0bf:	eb 26                	jmp    a0e7 <extmemwrite+0x33>
-    a0c1:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
-    a0c4:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    a0c7:	01 c2                	add    dx,ax
-    a0c9:	89 d3                	mov    bx,dx
-    a0cb:	36 8a 0f             	mov    cl,BYTE PTR ss:[bx]
+0000a0b2 <extmemwrite>:
+    a0b2:	55                   	push   bp
+    a0b3:	89 e5                	mov    bp,sp
+    a0b5:	83 ec 02             	sub    sp,0x2
+    a0b8:	c7 46 fe 00 00       	mov    WORD PTR [bp-0x2],0x0
+    a0bd:	eb 28                	jmp    a0e7 <extmemwrite+0x35>
+    a0bf:	8b 56 04             	mov    dx,WORD PTR [bp+0x4]
+    a0c2:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a0c5:	01 c2                	add    dx,ax
+    a0c7:	89 d3                	mov    bx,dx
+    a0c9:	36 8a 07             	mov    al,BYTE PTR ss:[bx]
+    a0cc:	88 c1                	mov    cl,al
     a0ce:	8b 56 08             	mov    dx,WORD PTR [bp+0x8]
     a0d1:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
     a0d4:	01 d0                	add    ax,dx
@@ -364,7 +364,7 @@ Disassembly of section .text:
     a0e7:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
     a0ea:	3b 46 06             	cmp    ax,WORD PTR [bp+0x6]
     a0ed:	3b 46 06             	cmp    ax,WORD PTR [bp+0x6]
-    a0f0:	72 cf                	jb     a0c1 <extmemwrite+0xd>
+    a0f0:	72 cd                	jb     a0bf <extmemwrite+0xd>
     a0f2:	90                   	nop
     a0f3:	89 ec                	mov    sp,bp
     a0f5:	5d                   	pop    bp
@@ -391,7 +391,7 @@ Disassembly of section .text:
     a118:	50                   	push   ax
     a119:	16                   	push   ss
     a11a:	1f                   	pop    ds
-    a11b:	e8 50 ff             	call   a06e <extmemread>
+    a11b:	e8 4e ff             	call   a06c <extmemread>
     a11e:	83 c4 06             	add    sp,0x6
     a121:	8b 46 04             	mov    ax,WORD PTR [bp+0x4]
     a124:	89 c2                	mov    dx,ax
@@ -402,7 +402,7 @@ Disassembly of section .text:
     a12e:	52                   	push   dx
     a12f:	16                   	push   ss
     a130:	1f                   	pop    ds
-    a131:	e8 5a fd             	call   9e8e <memcpy>
+    a131:	e8 58 fd             	call   9e8c <memcpy>
     a134:	83 c4 06             	add    sp,0x6
     a137:	8b 46 04             	mov    ax,WORD PTR [bp+0x4]
     a13a:	89 ec                	mov    sp,bp
@@ -426,7 +426,7 @@ Disassembly of section .text:
     a156:	50                   	push   ax
     a157:	16                   	push   ss
     a158:	1f                   	pop    ds
-    a159:	e8 58 ff             	call   a0b4 <extmemwrite>
+    a159:	e8 56 ff             	call   a0b2 <extmemwrite>
     a15c:	83 c4 06             	add    sp,0x6
     a15f:	90                   	nop
     a160:	5d                   	pop    bp
@@ -435,212 +435,211 @@ Disassembly of section .text:
     a163:	c3                   	ret    
 
 0000a164 <list>:
-    a164:	56                   	push   si
-    a165:	57                   	push   di
-    a166:	55                   	push   bp
-    a167:	89 e5                	mov    bp,sp
-    a169:	81 ec 50 01          	sub    sp,0x150
-    a16d:	36 a1 40 a3          	mov    ax,ss:0xa340
-    a171:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
-    a174:	c7 46 fc 00 00       	mov    WORD PTR [bp-0x4],0x0
-    a179:	e9 81 00             	jmp    a1fd <list+0x99>
-    a17c:	b8 23 a3             	mov    ax,0xa323
-    a17f:	50                   	push   ax
-    a180:	ff 76 fe             	push   WORD PTR [bp-0x2]
-    a183:	16                   	push   ss
-    a184:	1f                   	pop    ds
-    a185:	e8 dd fd             	call   9f65 <strspn>
-    a188:	83 c4 04             	add    sp,0x4
-    a18b:	89 46 f6             	mov    WORD PTR [bp-0xa],ax
-    a18e:	ff 76 f6             	push   WORD PTR [bp-0xa]
-    a191:	ff 76 fe             	push   WORD PTR [bp-0x2]
-    a194:	16                   	push   ss
-    a195:	1f                   	pop    ds
-    a196:	e8 68 fe             	call   a001 <atoin>
-    a199:	83 c4 04             	add    sp,0x4
-    a19c:	89 46 ee             	mov    WORD PTR [bp-0x12],ax
-    a19f:	b0 0d                	mov    al,0xd
-    a1a1:	50                   	push   ax
-    a1a2:	ff 76 fe             	push   WORD PTR [bp-0x2]
-    a1a5:	16                   	push   ss
-    a1a6:	1f                   	pop    ds
-    a1a7:	e8 6a fd             	call   9f14 <strchr>
-    a1aa:	83 c4 04             	add    sp,0x4
-    a1ad:	89 c2                	mov    dx,ax
-    a1af:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    a1b2:	29 c2                	sub    dx,ax
-    a1b4:	89 d0                	mov    ax,dx
-    a1b6:	89 46 f4             	mov    WORD PTR [bp-0xc],ax
-    a1b9:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    a1bc:	89 46 f0             	mov    WORD PTR [bp-0x10],ax
-    a1bf:	8b 46 f4             	mov    ax,WORD PTR [bp-0xc]
-    a1c2:	89 46 f2             	mov    WORD PTR [bp-0xe],ax
-    a1c5:	ff 76 fc             	push   WORD PTR [bp-0x4]
-    a1c8:	83 c4 fa             	add    sp,0xfffa
-    a1cb:	89 e0                	mov    ax,sp
-    a1cd:	89 c2                	mov    dx,ax
-    a1cf:	8d 4e ee             	lea    cx,[bp-0x12]
-    a1d2:	b8 06 00             	mov    ax,0x6
-    a1d5:	50                   	push   ax
-    a1d6:	51                   	push   cx
-    a1d7:	52                   	push   dx
-    a1d8:	16                   	push   ss
-    a1d9:	1f                   	pop    ds
-    a1da:	e8 b1 fc             	call   9e8e <memcpy>
-    a1dd:	83 c4 06             	add    sp,0x6
-    a1e0:	16                   	push   ss
-    a1e1:	1f                   	pop    ds
-    a1e2:	e8 5b ff             	call   a140 <writeelement_list>
-    a1e5:	83 c4 08             	add    sp,0x8
-    a1e8:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    a1eb:	40                   	inc    ax
-    a1ec:	89 46 fc             	mov    WORD PTR [bp-0x4],ax
-    a1ef:	8b 46 f4             	mov    ax,WORD PTR [bp-0xc]
-    a1f2:	40                   	inc    ax
-    a1f3:	89 c2                	mov    dx,ax
-    a1f5:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
-    a1f8:	01 d0                	add    ax,dx
-    a1fa:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
-    a1fd:	8b 5e fe             	mov    bx,WORD PTR [bp-0x2]
-    a200:	36 8a 07             	mov    al,BYTE PTR ss:[bx]
-    a203:	3c 01                	cmp    al,0x1
-    a205:	20 c0                	and    al,al
-    a207:	74 0f                	je     a218 <list+0xb4>
-    a209:	8b 5e fe             	mov    bx,WORD PTR [bp-0x2]
-    a20c:	36 8a 07             	mov    al,BYTE PTR ss:[bx]
-    a20f:	3c 0d                	cmp    al,0xd
-    a211:	3c 0d                	cmp    al,0xd
-    a213:	74 03                	je     a218 <list+0xb4>
-    a215:	e9 64 ff             	jmp    a17c <list+0x18>
-    a218:	c7 46 fa 00 00       	mov    WORD PTR [bp-0x6],0x0
-    a21d:	eb 7d                	jmp    a29c <list+0x138>
-    a21f:	8b 46 fa             	mov    ax,WORD PTR [bp-0x6]
-    a222:	8d 56 e8             	lea    dx,[bp-0x18]
-    a225:	50                   	push   ax
-    a226:	52                   	push   dx
-    a227:	16                   	push   ss
-    a228:	1f                   	pop    ds
-    a229:	e8 cd fe             	call   a0f9 <readelement_list>
-    a22c:	83 c4 04             	add    sp,0x4
-    a22f:	8b 46 fa             	mov    ax,WORD PTR [bp-0x6]
-    a232:	40                   	inc    ax
-    a233:	8d 56 e2             	lea    dx,[bp-0x1e]
-    a236:	50                   	push   ax
-    a237:	52                   	push   dx
-    a238:	16                   	push   ss
-    a239:	1f                   	pop    ds
-    a23a:	e8 bc fe             	call   a0f9 <readelement_list>
-    a23d:	83 c4 04             	add    sp,0x4
-    a240:	8b 56 e8             	mov    dx,WORD PTR [bp-0x18]
-    a243:	8b 46 e2             	mov    ax,WORD PTR [bp-0x1e]
-    a246:	39 c2                	cmp    dx,ax
-    a248:	39 c2                	cmp    dx,ax
-    a24a:	7e 49                	jle    a295 <list+0x131>
-    a24c:	8b 46 fa             	mov    ax,WORD PTR [bp-0x6]
-    a24f:	50                   	push   ax
-    a250:	83 c4 fa             	add    sp,0xfffa
-    a253:	89 e0                	mov    ax,sp
-    a255:	89 c2                	mov    dx,ax
-    a257:	8d 4e e2             	lea    cx,[bp-0x1e]
-    a25a:	b8 06 00             	mov    ax,0x6
-    a25d:	50                   	push   ax
-    a25e:	51                   	push   cx
-    a25f:	52                   	push   dx
-    a260:	16                   	push   ss
-    a261:	1f                   	pop    ds
-    a262:	e8 29 fc             	call   9e8e <memcpy>
-    a265:	83 c4 06             	add    sp,0x6
-    a268:	16                   	push   ss
-    a269:	1f                   	pop    ds
-    a26a:	e8 d3 fe             	call   a140 <writeelement_list>
-    a26d:	83 c4 08             	add    sp,0x8
-    a270:	8b 46 fa             	mov    ax,WORD PTR [bp-0x6]
-    a273:	40                   	inc    ax
-    a274:	50                   	push   ax
-    a275:	83 c4 fa             	add    sp,0xfffa
-    a278:	89 e0                	mov    ax,sp
-    a27a:	89 c2                	mov    dx,ax
-    a27c:	8d 4e e8             	lea    cx,[bp-0x18]
-    a27f:	b8 06 00             	mov    ax,0x6
-    a282:	50                   	push   ax
-    a283:	51                   	push   cx
-    a284:	52                   	push   dx
-    a285:	16                   	push   ss
-    a286:	1f                   	pop    ds
-    a287:	e8 04 fc             	call   9e8e <memcpy>
-    a28a:	83 c4 06             	add    sp,0x6
-    a28d:	16                   	push   ss
-    a28e:	1f                   	pop    ds
-    a28f:	e8 ae fe             	call   a140 <writeelement_list>
-    a292:	83 c4 08             	add    sp,0x8
-    a295:	8b 46 fa             	mov    ax,WORD PTR [bp-0x6]
-    a298:	40                   	inc    ax
-    a299:	89 46 fa             	mov    WORD PTR [bp-0x6],ax
-    a29c:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
-    a29f:	48                   	dec    ax
-    a2a0:	89 c2                	mov    dx,ax
-    a2a2:	8b 46 fa             	mov    ax,WORD PTR [bp-0x6]
-    a2a5:	39 c2                	cmp    dx,ax
-    a2a7:	39 c2                	cmp    dx,ax
-    a2a9:	76 03                	jbe    a2ae <list+0x14a>
-    a2ab:	e9 71 ff             	jmp    a21f <list+0xbb>
-    a2ae:	c7 46 f8 00 00       	mov    WORD PTR [bp-0x8],0x0
-    a2b3:	eb 46                	jmp    a2fb <list+0x197>
-    a2b5:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
-    a2b8:	8d 56 dc             	lea    dx,[bp-0x24]
-    a2bb:	50                   	push   ax
-    a2bc:	52                   	push   dx
-    a2bd:	16                   	push   ss
-    a2be:	1f                   	pop    ds
-    a2bf:	e8 37 fe             	call   a0f9 <readelement_list>
-    a2c2:	83 c4 04             	add    sp,0x4
-    a2c5:	8b 56 e0             	mov    dx,WORD PTR [bp-0x20]
-    a2c8:	8b 46 de             	mov    ax,WORD PTR [bp-0x22]
-    a2cb:	52                   	push   dx
-    a2cc:	50                   	push   ax
-    a2cd:	8d 86 b0 fe          	lea    ax,[bp-0x150]
-    a2d1:	50                   	push   ax
-    a2d2:	16                   	push   ss
-    a2d3:	1f                   	pop    ds
-    a2d4:	e8 b7 fb             	call   9e8e <memcpy>
-    a2d7:	83 c4 06             	add    sp,0x6
-    a2da:	8b 7e e0             	mov    di,WORD PTR [bp-0x20]
-    a2dd:	89 ee                	mov    si,bp
-    a2df:	89 fb                	mov    bx,di
-    a2e1:	36 c6 80 b0 fe 00    	mov    BYTE PTR ss:[bx+si-0x150],0x0
-    a2e7:	8d 86 b0 fe          	lea    ax,[bp-0x150]
-    a2eb:	50                   	push   ax
-    a2ec:	16                   	push   ss
-    a2ed:	1f                   	pop    ds
-    a2ee:	e8 5a fb             	call   9e4b <PrintStringLn>
-    a2f1:	83 c4 02             	add    sp,0x2
-    a2f4:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
-    a2f7:	40                   	inc    ax
-    a2f8:	89 46 f8             	mov    WORD PTR [bp-0x8],ax
-    a2fb:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
-    a2fe:	3b 46 fc             	cmp    ax,WORD PTR [bp-0x4]
-    a301:	3b 46 fc             	cmp    ax,WORD PTR [bp-0x4]
-    a304:	72 af                	jb     a2b5 <list+0x151>
-    a306:	90                   	nop
-    a307:	89 ec                	mov    sp,bp
-    a309:	5d                   	pop    bp
-    a30a:	5f                   	pop    di
-    a30b:	5e                   	pop    si
-    a30c:	16                   	push   ss
-    a30d:	1f                   	pop    ds
-    a30e:	c3                   	ret    
+    a164:	55                   	push   bp
+    a165:	89 e5                	mov    bp,sp
+    a167:	83 ec 1e             	sub    sp,0x1e
+    a16a:	36 a1 48 a3          	mov    ax,ss:0xa348
+    a16e:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
+    a171:	c7 46 fc 00 00       	mov    WORD PTR [bp-0x4],0x0
+    a176:	e9 81 00             	jmp    a1fa <list+0x96>
+    a179:	b8 27 a3             	mov    ax,0xa327
+    a17c:	50                   	push   ax
+    a17d:	ff 76 fe             	push   WORD PTR [bp-0x2]
+    a180:	16                   	push   ss
+    a181:	1f                   	pop    ds
+    a182:	e8 de fd             	call   9f63 <strspn>
+    a185:	83 c4 04             	add    sp,0x4
+    a188:	89 46 f6             	mov    WORD PTR [bp-0xa],ax
+    a18b:	ff 76 f6             	push   WORD PTR [bp-0xa]
+    a18e:	ff 76 fe             	push   WORD PTR [bp-0x2]
+    a191:	16                   	push   ss
+    a192:	1f                   	pop    ds
+    a193:	e8 69 fe             	call   9fff <atoin>
+    a196:	83 c4 04             	add    sp,0x4
+    a199:	89 46 ee             	mov    WORD PTR [bp-0x12],ax
+    a19c:	b0 0d                	mov    al,0xd
+    a19e:	50                   	push   ax
+    a19f:	ff 76 fe             	push   WORD PTR [bp-0x2]
+    a1a2:	16                   	push   ss
+    a1a3:	1f                   	pop    ds
+    a1a4:	e8 6b fd             	call   9f12 <strchr>
+    a1a7:	83 c4 04             	add    sp,0x4
+    a1aa:	89 c2                	mov    dx,ax
+    a1ac:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a1af:	29 c2                	sub    dx,ax
+    a1b1:	89 d0                	mov    ax,dx
+    a1b3:	89 46 f4             	mov    WORD PTR [bp-0xc],ax
+    a1b6:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a1b9:	89 46 f0             	mov    WORD PTR [bp-0x10],ax
+    a1bc:	8b 46 f4             	mov    ax,WORD PTR [bp-0xc]
+    a1bf:	89 46 f2             	mov    WORD PTR [bp-0xe],ax
+    a1c2:	ff 76 fc             	push   WORD PTR [bp-0x4]
+    a1c5:	83 c4 fa             	add    sp,0xfffa
+    a1c8:	89 e0                	mov    ax,sp
+    a1ca:	89 c2                	mov    dx,ax
+    a1cc:	8d 4e ee             	lea    cx,[bp-0x12]
+    a1cf:	b8 06 00             	mov    ax,0x6
+    a1d2:	50                   	push   ax
+    a1d3:	51                   	push   cx
+    a1d4:	52                   	push   dx
+    a1d5:	16                   	push   ss
+    a1d6:	1f                   	pop    ds
+    a1d7:	e8 b2 fc             	call   9e8c <memcpy>
+    a1da:	83 c4 06             	add    sp,0x6
+    a1dd:	16                   	push   ss
+    a1de:	1f                   	pop    ds
+    a1df:	e8 5e ff             	call   a140 <writeelement_list>
+    a1e2:	83 c4 08             	add    sp,0x8
+    a1e5:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    a1e8:	40                   	inc    ax
+    a1e9:	89 46 fc             	mov    WORD PTR [bp-0x4],ax
+    a1ec:	8b 46 f4             	mov    ax,WORD PTR [bp-0xc]
+    a1ef:	40                   	inc    ax
+    a1f0:	89 c2                	mov    dx,ax
+    a1f2:	8b 46 fe             	mov    ax,WORD PTR [bp-0x2]
+    a1f5:	01 d0                	add    ax,dx
+    a1f7:	89 46 fe             	mov    WORD PTR [bp-0x2],ax
+    a1fa:	8b 5e fe             	mov    bx,WORD PTR [bp-0x2]
+    a1fd:	36 8a 07             	mov    al,BYTE PTR ss:[bx]
+    a200:	3c 01                	cmp    al,0x1
+    a202:	20 c0                	and    al,al
+    a204:	74 0f                	je     a215 <list+0xb1>
+    a206:	8b 5e fe             	mov    bx,WORD PTR [bp-0x2]
+    a209:	36 8a 07             	mov    al,BYTE PTR ss:[bx]
+    a20c:	3c 0d                	cmp    al,0xd
+    a20e:	3c 0d                	cmp    al,0xd
+    a210:	74 03                	je     a215 <list+0xb1>
+    a212:	e9 64 ff             	jmp    a179 <list+0x15>
+    a215:	c6 46 fb 01          	mov    BYTE PTR [bp-0x5],0x1
+    a219:	e9 9f 00             	jmp    a2bb <list+0x157>
+    a21c:	c6 46 fb 00          	mov    BYTE PTR [bp-0x5],0x0
+    a220:	c7 46 f8 00 00       	mov    WORD PTR [bp-0x8],0x0
+    a225:	e9 81 00             	jmp    a2a9 <list+0x145>
+    a228:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    a22b:	8d 56 e8             	lea    dx,[bp-0x18]
+    a22e:	50                   	push   ax
+    a22f:	52                   	push   dx
+    a230:	16                   	push   ss
+    a231:	1f                   	pop    ds
+    a232:	e8 c4 fe             	call   a0f9 <readelement_list>
+    a235:	83 c4 04             	add    sp,0x4
+    a238:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    a23b:	40                   	inc    ax
+    a23c:	8d 56 e2             	lea    dx,[bp-0x1e]
+    a23f:	50                   	push   ax
+    a240:	52                   	push   dx
+    a241:	16                   	push   ss
+    a242:	1f                   	pop    ds
+    a243:	e8 b3 fe             	call   a0f9 <readelement_list>
+    a246:	83 c4 04             	add    sp,0x4
+    a249:	8b 56 e8             	mov    dx,WORD PTR [bp-0x18]
+    a24c:	8b 46 e2             	mov    ax,WORD PTR [bp-0x1e]
+    a24f:	39 c2                	cmp    dx,ax
+    a251:	39 c2                	cmp    dx,ax
+    a253:	7e 4d                	jle    a2a2 <list+0x13e>
+    a255:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    a258:	50                   	push   ax
+    a259:	83 c4 fa             	add    sp,0xfffa
+    a25c:	89 e0                	mov    ax,sp
+    a25e:	89 c2                	mov    dx,ax
+    a260:	8d 4e e2             	lea    cx,[bp-0x1e]
+    a263:	b8 06 00             	mov    ax,0x6
+    a266:	50                   	push   ax
+    a267:	51                   	push   cx
+    a268:	52                   	push   dx
+    a269:	16                   	push   ss
+    a26a:	1f                   	pop    ds
+    a26b:	e8 1e fc             	call   9e8c <memcpy>
+    a26e:	83 c4 06             	add    sp,0x6
+    a271:	16                   	push   ss
+    a272:	1f                   	pop    ds
+    a273:	e8 ca fe             	call   a140 <writeelement_list>
+    a276:	83 c4 08             	add    sp,0x8
+    a279:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    a27c:	40                   	inc    ax
+    a27d:	50                   	push   ax
+    a27e:	83 c4 fa             	add    sp,0xfffa
+    a281:	89 e0                	mov    ax,sp
+    a283:	89 c2                	mov    dx,ax
+    a285:	8d 4e e8             	lea    cx,[bp-0x18]
+    a288:	b8 06 00             	mov    ax,0x6
+    a28b:	50                   	push   ax
+    a28c:	51                   	push   cx
+    a28d:	52                   	push   dx
+    a28e:	16                   	push   ss
+    a28f:	1f                   	pop    ds
+    a290:	e8 f9 fb             	call   9e8c <memcpy>
+    a293:	83 c4 06             	add    sp,0x6
+    a296:	16                   	push   ss
+    a297:	1f                   	pop    ds
+    a298:	e8 a5 fe             	call   a140 <writeelement_list>
+    a29b:	83 c4 08             	add    sp,0x8
+    a29e:	c6 46 fb 01          	mov    BYTE PTR [bp-0x5],0x1
+    a2a2:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    a2a5:	40                   	inc    ax
+    a2a6:	89 46 f8             	mov    WORD PTR [bp-0x8],ax
+    a2a9:	8b 46 fc             	mov    ax,WORD PTR [bp-0x4]
+    a2ac:	48                   	dec    ax
+    a2ad:	89 c2                	mov    dx,ax
+    a2af:	8b 46 f8             	mov    ax,WORD PTR [bp-0x8]
+    a2b2:	39 c2                	cmp    dx,ax
+    a2b4:	39 c2                	cmp    dx,ax
+    a2b6:	76 03                	jbe    a2bb <list+0x157>
+    a2b8:	e9 6d ff             	jmp    a228 <list+0xc4>
+    a2bb:	80 7e fb 01          	cmp    BYTE PTR [bp-0x5],0x1
+    a2bf:	80 7e fb 00          	cmp    BYTE PTR [bp-0x5],0x0
+    a2c3:	74 03                	je     a2c8 <list+0x164>
+    a2c5:	e9 54 ff             	jmp    a21c <list+0xb8>
+    a2c8:	90                   	nop
+    a2c9:	89 ec                	mov    sp,bp
+    a2cb:	5d                   	pop    bp
+    a2cc:	16                   	push   ss
+    a2cd:	1f                   	pop    ds
+    a2ce:	c3                   	ret    
 
-0000a30f <interpret>:
-    a30f:	55                   	push   bp
-    a310:	89 e5                	mov    bp,sp
-    a312:	b8 2e a3             	mov    ax,0xa32e
-    a315:	50                   	push   ax
-    a316:	16                   	push   ss
-    a317:	1f                   	pop    ds
-    a318:	e8 30 fb             	call   9e4b <PrintStringLn>
-    a31b:	83 c4 02             	add    sp,0x2
-    a31e:	90                   	nop
-    a31f:	5d                   	pop    bp
-    a320:	16                   	push   ss
-    a321:	1f                   	pop    ds
-    a322:	c3                   	ret    
+0000a2cf <interpret>:
+    a2cf:	55                   	push   bp
+    a2d0:	89 e5                	mov    bp,sp
+    a2d2:	81 ec 96 00          	sub    sp,0x96
+    a2d6:	8d 4e ea             	lea    cx,[bp-0x16]
+    a2d9:	b8 32 a3             	mov    ax,0xa332
+    a2dc:	ba 16 00             	mov    dx,0x16
+    a2df:	52                   	push   dx
+    a2e0:	50                   	push   ax
+    a2e1:	51                   	push   cx
+    a2e2:	16                   	push   ss
+    a2e3:	1f                   	pop    ds
+    a2e4:	e8 a5 fb             	call   9e8c <memcpy>
+    a2e7:	83 c4 06             	add    sp,0x6
+    a2ea:	b8 03 00             	mov    ax,0x3
+    a2ed:	50                   	push   ax
+    a2ee:	b8 16 00             	mov    ax,0x16
+    a2f1:	50                   	push   ax
+    a2f2:	8d 46 ea             	lea    ax,[bp-0x16]
+    a2f5:	50                   	push   ax
+    a2f6:	16                   	push   ss
+    a2f7:	1f                   	pop    ds
+    a2f8:	e8 b7 fd             	call   a0b2 <extmemwrite>
+    a2fb:	83 c4 06             	add    sp,0x6
+    a2fe:	b8 03 00             	mov    ax,0x3
+    a301:	50                   	push   ax
+    a302:	b8 16 00             	mov    ax,0x16
+    a305:	50                   	push   ax
+    a306:	8d 86 6a ff          	lea    ax,[bp-0x96]
+    a30a:	50                   	push   ax
+    a30b:	16                   	push   ss
+    a30c:	1f                   	pop    ds
+    a30d:	e8 5c fd             	call   a06c <extmemread>
+    a310:	83 c4 06             	add    sp,0x6
+    a313:	8d 86 6a ff          	lea    ax,[bp-0x96]
+    a317:	50                   	push   ax
+    a318:	16                   	push   ss
+    a319:	1f                   	pop    ds
+    a31a:	e8 2e fb             	call   9e4b <PrintStringLn>
+    a31d:	83 c4 02             	add    sp,0x2
+    a320:	90                   	nop
+    a321:	89 ec                	mov    sp,bp
+    a323:	5d                   	pop    bp
+    a324:	16                   	push   ss
+    a325:	1f                   	pop    ds
+    a326:	c3                   	ret    

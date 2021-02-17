@@ -65,8 +65,8 @@ extern void PrintLn();
 extern void PrintStringLn(char*);
 extern void GetPromptString();
 extern void ClearInputBuffer();
-extern void ExtendedStore(short, char);
-extern char ExtendedRead();
+extern void ExtendedStore(size_t, unsigned char);
+extern unsigned char ExtendedLoad(size_t);
 
 // ==================================== SPECIFIC ====================================
 
@@ -84,7 +84,7 @@ typedef struct basicline_list {
 
 void extmemread(void *to, size_t size, size_t extoffset) {
 	for (size_t i = 0; i < size; i++) {
-		((char*)to)[i] = ExtendedRead(extoffset + i);
+		((char*)to)[i] = ExtendedLoad(extoffset + i);
 	}
 }
 
@@ -110,9 +110,10 @@ void writeelement_list(basicline_list_t elem, size_t idx) {
 void list() {
 	// Write array to extended memory
 	char *str = (char*)programstr;
+	if (str[0] == '\0') return;
 	size_t idx = 0;
 	
-	while (str[0] != '\0' && str[0] != '\r') {
+	while ((str[idx] != '\0') && (str[idx] != '\r')) {
 		basicline_list_t line;
 
 		// 10 PRINT "XD"  ; Line number "10"
@@ -128,16 +129,24 @@ void list() {
 		str += llen + 1;
 	}
 	
+	//basicline_list_t t1;
+	//t1 = readelement_list(0);
+	
 	// Bubble sort
-	for (int i = 0; i < idx - 1; i++) {
-		basicline_list_t t1;
-		t1 = readelement_list(i);
-		basicline_list_t t2;
-		t2 = readelement_list(i + 1);
-		
-		if (t1.linen > t2.linen) {
-			writeelement_list(t2, i);
-			writeelement_list(t1, i + 1);
+	bool repeat = true;
+	while (repeat) {
+		repeat = false;
+		for (int i = 0; i < idx - 1; i++) {
+			basicline_list_t t1;
+			t1 = readelement_list(i);
+			basicline_list_t t2;
+			t2 = readelement_list(i + 1);
+			
+			if (t1.linen > t2.linen) {
+				writeelement_list(t2, i);
+				writeelement_list(t1, i + 1);
+				repeat = true;
+			}
 		}
 	}
 	
@@ -153,6 +162,11 @@ void list() {
 }
 
 void interpret() {
-	PrintStringLn("interpretando :)");
+	//PrintStringLn("interpretando :)");
 	//PrintLn();
+	char str[] = "esto es una string :v";
+	extmemwrite(str, 22, 0x0003);
+	char str2[128];
+	extmemread(str2, 22, 0x0003);
+	PrintStringLn(str2);
 }

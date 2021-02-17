@@ -1,5 +1,6 @@
+/*INPUT(entry.o, main.o)*/
 OUTPUT_FORMAT("elf32-i386")
-OUTPUT(interpret)
+OUTPUT(core)
 ENTRY(_interpret)
 SECTIONS
 {

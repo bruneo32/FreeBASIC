@@ -1,5 +1,6 @@
+/*INPUT(entry.o, main.o)*/
 OUTPUT_FORMAT("binary")
-OUTPUT(interpret.bin)
+OUTPUT(core.bin)
 ENTRY(_interpret)
 SECTIONS
 {
