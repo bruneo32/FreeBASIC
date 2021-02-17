@@ -13,3 +13,4 @@
 # Done
 - COLOR Command
 - Basic LIST
+- List single line
