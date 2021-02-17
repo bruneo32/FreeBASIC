@@ -1,6 +1,6 @@
-# TODO
-- Return next char pointer in program buffer from list
-- List arguments
+# TODO: Core
+- Return next char pointer in program buffer from LIST
+- LIST arguments
 - Delete left zeroes & empty lines
 
 # TODO: System
@@ -8,4 +8,4 @@
 
 # Done
 - COLOR Command
-- Basic list
+- Basic LIST
