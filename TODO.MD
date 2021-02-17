@@ -3,10 +3,9 @@
 - List arguments
 - Delete left zeroes & empty lines
 
-# Done
-- Basic list
-
-
 # TODO: System
 - COLOR Command
 - TEMPLATES
+
+# Done
+- Basic list
