@@ -11,9 +11,9 @@ Generates `/os/basic/interpret.bin` flat binary, and `/os/basic/interpret` elf32
 
 ## Memory map
 ```
-                                  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  
-Total space              1MiB    /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \
-  0x000FFFFF      ===================================================    *Each line AAAAAAAAA
+                    /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  
+Total space        /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \
+  0x000FFFFF      =================================================== 1MiB
    384K           = Reserved VRAM, memory mapped I/O,               =
                   = more BIOS stuff                                 =
                   =                                                 =
@@ -59,8 +59,8 @@ Total space              1MiB    /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  
                   =                                                 =
                   =                                                 =
   0xAA00          ===================================================
-                  = OS  kernel                                      = --> KIT: 0x7F00 (length: 32 bytes)
-                  =                                                 =
+                  = OS  kernel                                      =
+                  =                                                 = --> KIT: 0x7F00 (length: 32 bytes)
                   =                                  11K : 11264    =
   0x7E00          ===================================================
                   = BOOT bootloader                 0.5K : 512      =
