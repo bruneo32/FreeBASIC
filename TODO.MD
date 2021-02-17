@@ -4,8 +4,8 @@
 - Delete left zeroes & empty lines
 
 # TODO: System
-- COLOR Command
 - TEMPLATES
 
 # Done
+- COLOR Command
 - Basic list
