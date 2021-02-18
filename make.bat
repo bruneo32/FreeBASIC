@@ -5,7 +5,7 @@ echo.
 cd os
 
 cd data
-nasm bootdisk.asm -f bin -o bootdisk.bin
+nasm bootdisk.asm -f bin -o bootdisk.flp
 cd ..
 
 nasm boot.asm -f bin -o boot.bin
