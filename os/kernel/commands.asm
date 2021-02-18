@@ -450,7 +450,8 @@ cmd_COLOR:
 str_cmd_DSK:
 	db 'DSK',0
 str_cmdh_DSK:
-	db ' (?) Jump to the root directory of the disk specified. Example: DSK 0 (System disk), DSK 1, DSK 2, ...',0
+	db ' (?) Jump to the root directory of the disk specified. Example: DSK 0, DSK 1, DSK 2, ...',13
+	db '     Use "DSK ." to jmp to the system disk.',0
 cmd_DSK:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -465,16 +466,23 @@ cmd_DSK:
 	ret
 	
 	.comm:
-	
 	mov bl, byte [_InputBuffer+4]
+	
+	cmp bl, byte '.'
+	jnz .si
+	mov bl, byte [BOOT_DRIVE]
+	jmp .su
+	
 	cmp bl, byte '0'
 	jl .cmdEndB
 	
+	.si:
 	sub bl, byte '0'
+	
+	.su:
 	mov byte [_CurrentDisk], bl
 	mov dl, bl
 	call __GetDriveParameters
-	jc .cmdEndB
 	mov byte [_CD], 0x00
 	mov byte [_CD+1], 0x01
 	
@@ -902,6 +910,8 @@ cmd_LD:
 	xor bx, bx
 	ret
 	
+	.str_blist:
+		db '  Boot Disk: ',0
 	.str_diskettes:
 		db '  Available disks: ',0
 	.str_list:
@@ -909,46 +919,56 @@ cmd_LD:
 	
 	.comm:
 	
-	int 11h
-	;                           Equipment code (AX)
-	;=============================================================================
-	; F E D C B A 9 8  7 6 5 4 3 2 1 0
-	; x x . . . . . .  . . . . . . . .  Number of printers installed
-	; . . x . . . . .  . . . . . . . .  Internal modem installed
-	; . . . x . . . .  . . . . . . . .  Game adapter installed? (always 1 on PCJr)
-	; . . . . x x x .  . . . . . . . .  Number of RS-232 ports
-	; . . . . . . . x  . . . . . . . .  Reserved
-	; . . . . . . . .  x x . . . . . .  Number of diskettes - 1 (i.e. 0=1 disk)
-	; . . . . . . . .  . . x x . . . .  Initial video mode (see below)
-	; . . . . . . . .  . . . . x . . .  Reserved
-	; . . . . . . . .  . . . . . x . .  Reserved
-	; . . . . . . . .  . . . . . . x .  Math coprocessor installed?
-	; . . . . . . . .  . . . . . . . x  1=diskettes present; 0=no disks present
-	
-	and al, 11000000b ; Esos dos digitos binarios indican el numero de disquetes que ;hay
-	shr al, 6
-	
-	add al, byte '1' ;Minimo uno
+	call PrintLn
+	mov si, .str_blist
+	call PrintString
+	mov al, byte [BOOT_DRIVE]
+	add al, byte '0'
+	mov ah, 0x0e
+	int 10h
 	
 	call PrintLn
 	
 	mov si, .str_diskettes
 	call PrintString
-	mov ah, 0x0e
-	int 10h
 	
 	mov cl, al
-	mov al, byte '0'
+	xor al, al
 	.cdsk:
-		cmp al, cl
-		jge .exitCdsk
+		cmp al, 0xFF
+		jz .exitCdsk
 		
+		
+		push ax
+		
+		clc
+		xor ax, ax ; Reset
+		int 13h
+		xor bx, bx
+		mov es, bx
+		mov bx, _BRFS_TRS_
+		pop ax
+		push ax
+		mov dl, al
+		mov al, 0x01 ; Sectors to read
+		xor ch,ch ; Cilindro.
+		xor dh,dh ; Cabeza.
+		mov cl, 0x01 ; Sector
+		mov ah, 0x02 ; Read Disk int 13h/02h
+		int 13h
+		jc .next ; No se puede leer = No existe
+		pop ax
+		
+		push ax
 		call PrintLn
 		mov si, .str_list
 		call PrintString
+		add al, byte '0'
 		mov ah, 0x0e
 		int 10h
 		
+		.next:
+		pop ax
 		inc al
 		jmp .cdsk
 	.exitCdsk:
