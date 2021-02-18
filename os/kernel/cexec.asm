@@ -59,6 +59,30 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	DSK
+	mov si, _InputBuffer
+	mov di, str_cmd_DSK
+	call iStringCompareSpace
+	call cmd_DSK
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
+	;	DSKDAT
+	mov si, _InputBuffer
+	mov di, str_cmd_DSKDAT
+	call iStringCompareSpace
+	call cmd_DSKDAT
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
+	;	FORMAT
+	mov si, _InputBuffer
+	mov di, str_cmd_FORMAT
+	call iStringCompareSpace
+	call cmd_FORMAT
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	INF
 	mov si, _InputBuffer
 	mov di, str_cmd_INF
@@ -88,6 +112,14 @@ _con_exec:
 	mov di, str_cmd_NEW
 	call iStringCompareSpace
 	call cmd_NEW
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
+	;	LD
+	mov si, _InputBuffer
+	mov di, str_cmd_LD
+	call iStringCompareSpace
+	call cmd_LD
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	

@@ -1,6 +1,5 @@
 ; Entry point
 CustomConsole:
-	;call ConsoleClear
 	
 	; Fill with color
 	mov al, ' '
@@ -11,6 +10,13 @@ CustomConsole:
 	
 	call ConsoleClear
 	
+	; Fill with color
+	mov al, ' '
+	mov bh, 0x1B
+	mov cx, 0x0305
+	mov dx, 0x0649
+	call _AttrRect
+	
 	mov si, str_welcome
 	call PrintStringLn
 	
@@ -20,7 +26,7 @@ CustomConsole:
 ; System required variables
 COLOR:
 	; See "COLOR ?"
-	db 0x1B
+	db 0x1F
 SafeRect:
 	;  ROW  COL
 	db 0x03,0x05 ; Top-left corner

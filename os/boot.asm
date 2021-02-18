@@ -25,7 +25,7 @@ EBPB: ; -------------------------------------------------
 	db 0						; reserved
 	db 0x69						; signature, maybe 0 or 29 or 28
 	dd 0						; volume ID
-	db 'NO LABEL   '			; volume label, 11 bytes
+	db 'FreeBASIC  '			; volume label, 11 bytes
 	db 'BRFS    '				; file system type, 8 bytes
 
 ; CODE
@@ -41,8 +41,8 @@ mov es, ax
 mov fs, ax
 mov gs, ax
 
-mov bx, 0x7800 ; x7a00 = BRFS-TRS, 0x7800 = BRFS-TWS
-mov ebx, 0x00007800 ; For x86_64 machines
+mov bx, 0x5000 ; x7a00 = BRFS-TRS, 0x7800 = BRFS-TWS
+mov ebx, 0x00005000 ; For x86_64 machines
 cli
 mov ss, ax
 mov sp, bx
@@ -127,7 +127,7 @@ db 0x55,0xaa
 
 ; ROOT
 ROOT:
-db 'hola.txt',0x1c,0x00,0x18
-db 'FOLDER',0x1d,0x00,0x19
+db 'hola.txt',0x1c,0x00,0x1c
+db 'FOLDER',0x1d,0x00,0x1d
 
 times 512-($-ROOT) db 0

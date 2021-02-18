@@ -1,7 +1,5 @@
 ; Entry point
 CustomConsole:
-	call ConsoleClear
-	
 	mov si, str_welcome
 	call PrintStringLn
 	

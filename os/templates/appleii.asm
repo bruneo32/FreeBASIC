@@ -1,7 +1,5 @@
 ; Entry point
 CustomConsole:
-	call ConsoleClear
-	
 	mov si, str_welcome
 	call PrintStringLn
 	
@@ -24,6 +22,6 @@ str_pretext:
 ; Custom variables
 str_welcome:
 	db 13 ; Salto de linea
-	times 80/2-3 db ' ' ; Tamaño de la pantalla/2 - string.length/2
+	times 80/2-4 db ' ' ; Tamaño de la pantalla/2 - string.length/2
 	db 'APPLE //e'
 	db 13,0

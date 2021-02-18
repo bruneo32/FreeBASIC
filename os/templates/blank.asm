@@ -1,6 +1,5 @@
 ; Entry point
 CustomConsole:
-	call ConsoleClear
 	
 	mov si, str_welcome
 	call PrintStringLn
@@ -23,5 +22,4 @@ str_pretext:
 
 ; Custom variables
 str_welcome:
-	db 13,'   Welcome!',13
 	db 0

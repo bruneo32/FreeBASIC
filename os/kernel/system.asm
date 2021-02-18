@@ -138,6 +138,7 @@ _sys_shutdown:
     mov bx, 0x0001
     mov cx, 0x0003
     int 0x15
+	jc .error
 	
 	; ACPI (if APM didnt work)
 	; ???

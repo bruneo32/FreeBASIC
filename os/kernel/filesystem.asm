@@ -1,12 +1,9 @@
 _BRFS_TRS_ equ 0x7a00 ; 512 antes de 0x7c00
 _BRFS_TWS_ equ 0x7800 ; 512 antes de 0x7a00
+_CurrentDisk:
+	db 0
 _CD:
 	db 0x00,0x01 ; Root
-; _CD_str_buffer equ 300
-; _CD_str:
-	; db '\'
-	; times _CD_str_buffer-1 db 0
-	; db 0
 _str_diskerror:
 	db 'Disk Read Error',0
 
@@ -61,19 +58,22 @@ LBA2CHS:
 	popa
 	ret
 __GetDriveParameters:
+	; DL - Drive Number
 	pusha
 	
 	mov ah, 0x08
-	mov dl, [BOOT_DRIVE]
 	int 13h
+	jc .end
 	
 	mov [_NumCillinders], ch
 	mov [_SectorsPerTrack], cl
 	mov [_NumHeads], dh
 	
+	.end:
 	popa
 	ret
 _BRFS_ReadSector:
+	pusha
 	; Adress in BH:BL
 	call LBA2CHS
 	
@@ -101,7 +101,7 @@ _BRFS_ReadSector:
 	mov ch, [_lba_C] ; Cilindro.
 	mov dh, [_lba_H] ; Cabeza.
 	mov cl, [_lba_S] ; Sector
-	mov dl, [BOOT_DRIVE]
+	mov dl, [_CurrentDisk]
 	
 	mov ah, 0x02 ; Read Disk int 13h/02h
 	int 13h
@@ -113,6 +113,7 @@ _BRFS_ReadSector:
 	stc
 	
 	.end:
+	popa
 	ret
 _BRFS_ReadSectorCD:
 	mov bh, [_CD]
@@ -228,4 +229,23 @@ _BRFS_GetElementFromDir:
 	.end:
 	; DX: SECTOR OF
 	; CF if elm not exist
+	ret
+
+_BRFS_MoveReaded:
+	; DI: Start address in memory
+	pusha
+	mov si, _BRFS_TRS_
+	.loop:
+		cmp si, _BRFS_TRS_+512
+		jae .exitLoop
+		
+		mov bh, [si]
+		mov byte [di], bh
+		
+		inc di
+		inc si
+		jmp .loop
+	.exitLoop:
+	
+	popa
 	ret

@@ -1,4 +1,4 @@
-__SecretSleep__ equ 100
+__SecretSleep__ equ 150
 __SECRETGAME__:
 	
 	mov bx, word 1
@@ -49,8 +49,9 @@ __SECRETGAME__:
 		
 		push cx
 		
-		xor dh, dh
-		mov dl, 0x06
+		mov dh, byte [SafeRect]
+		inc dh
+		mov dl, 0x16
 		call SetCursorPos
 		
 		add cx, __SG_BASIC_STR

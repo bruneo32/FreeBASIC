@@ -2,10 +2,29 @@
 
 BasicSpace equ 0xAA00
 GeneralSpace equ 0x10000
-
+BASCORE_SIZE equ 5
 
 mov [BOOT_DRIVE], dl
+mov [_CurrentDisk], dl ; Set Disk
 call __GetDriveParameters
+
+mov di, 0x5000
+mov bx, word 0x18
+mov cl, BASCORE_SIZE
+.loadModule:
+	cmp cl, byte 0
+	jz .exitLoadmodule
+	pusha
+	
+	call _BRFS_ReadSector
+	call _BRFS_MoveReaded
+	
+	popa
+	add di, 512
+	inc bx
+	dec cl
+	jmp .loadModule
+.exitLoadmodule:
 
 mov byte [BasicSpace], byte 0
 
@@ -13,9 +32,8 @@ xor ah, ah ; Set video mode
 mov al, [VideoMode]
 int 10h
 
-call ConsoleClear ; Clear
+call ConsoleClear
 call CustomConsole ; Clear + TEMPLATE
-
 
 MainLoop:
 	mov si, str_pretext
@@ -72,17 +90,11 @@ KIT: ; KIT, Kernel Interface Table
 BasicProgramCounter: dw BasicSpace
 
 
-%include "templates/c64.asm"
+%include "templates/appleii.asm"
 %include "kernel/kernel.asm"
 %include "basic/mit.asm" ; Module Interface Table
 
-times 16*512-($-$$) db 0
-; ----------------------------------------
-; 0x9e00
-MIT:
-incbin "basic/core.bin" ; Usar MIT
-
-times 6*512-($-MIT) db 0
+times 22*512-($-$$) db 0
 ; ----------------------------------------
 ; 22 sectores, reservados para el sistema, lo siguiente será el sistema de archivos en el disco, pero en la memoria el programa BASIC
 

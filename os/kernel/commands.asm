@@ -14,7 +14,7 @@ str_cmds:
 	db '  > COPY, COPYD, INF, INFD, MOV, MOVD, STR, STRD',13
 	db 13
 	db ' Commands about disks:',13
-	db '  > DSK, FORMAT, LD'
+	db '  > DSK, DSKDAT, FORMAT, LD'
 	
 	db 0
 	
@@ -41,7 +41,7 @@ cmd_HELP:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -128,6 +128,7 @@ cmd_CAT:
 			pop dx
 			pop si
 		.salto:
+			add si,2
 			call PrintLn
 			mov ah, 0x0e
 			mov al, ' '
@@ -167,6 +168,7 @@ cmd_CAT:
 		inc si
 		jmp .loop
 	.exitLoop:
+	mov si, _BRFS_TRS_+510
 	xor bh, bh
 	cmp bh, [si]
 	jnz .leermas
@@ -183,7 +185,7 @@ cmd_CAT:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -232,7 +234,8 @@ cmd_CD:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov si, _str_cc_unkPath
+	call PrintStringLn
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -299,7 +302,7 @@ cmd_CDT:
 str_cmd_CLS:
 	db 'CLS',0
 str_cmdh_CLS:
-	db ' (?) Clear the screen.',0
+	db ' (?) Clear the screen rect.',0
 cmd_CLS:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -319,7 +322,7 @@ cmd_CLS:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -342,7 +345,8 @@ str_cmdh_COLOR:
 	db 13
 	db '  > First digit  : Background color',13
 	db '  > Second digit : Foreground color',13
-	db '  Example:  COLOR 1F, produces bright white foreground over a blue background.'
+	db '  Example:  COLOR 1F, produces bright white foreground over a blue background.',13
+	db '  *Note: The background has 8 colors and the foreground 16 (F); if you try a background color above 7, it results on a blinking text.'
 	db 0
 cmd_COLOR:
 	; Verificacion rutinaria
@@ -366,36 +370,167 @@ cmd_COLOR:
 	jz .cmdEndB
 	cmp bl, byte 0
 	jz .cmdEndB
-	cmp bh, 0x30 ; '0'
+	cmp bl, byte '0'
 	jl .cmdEndB
-	cmp bh, 0x46 ; 'F'
-	jg .cmdEndB
-	cmp bl, 0x30 ; '0'
-	jl .cmdEndB
-	cmp bl, 0x46 ; 'F'
+	cmp bl, byte 'z'
 	jg .cmdEndB
 	
+	cmp bh, byte 'a'
+	jl .nextm3
+	sub bh, 32
+	.nextm3:
+	cmp bl, byte 'a'
+	jl .nextm2
+	sub bl, 32
+	
+	.nextm2:
+	cmp bh, byte '9'
+	jl .nextm1
+	cmp bh, byte 'A'
+	jl .cmdEndB
+	.nextm1:
+	cmp bl, byte '9'
+	jl .next0
+	cmp bl, byte 'A'
+	jl .cmdEndB
+	
+	
+	.next0:
 	sub bh, byte '0'
 	sub bl, byte '0'
 	
-	cmp bh, 0x09
-	jge .next1
+	.next:
+	cmp bh, 0x0a
+	jl .next11
 	sub bh, 0x07
-	.next1:
-	cmp bl, 0x09
-	jge .next2
+	.next11:
+	cmp bl, 0x0a
+	jl .next2
 	sub bl, 0x07
-	.next2:
 	
+	.next2:
 	shl bh, 4
 	or bh, bl
-	mov [COLOR], bh
+	
+	mov byte [COLOR], bh
 	
 	call _FillColor
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_DSK:
+	db 'DSK',0
+str_cmdh_DSK:
+	db ' (?) Jump to the root directory of the disk specified. Example: DSK 0 (System disk), DSK 1, DSK 2, ...',0
+cmd_DSK:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_DSK
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.comm:
+	
+	mov bl, byte [_InputBuffer+4]
+	cmp bl, byte '0'
+	jl .cmdEndB
+	
+	sub bl, byte '0'
+	mov byte [_CurrentDisk], bl
+	mov dl, bl
+	call __GetDriveParameters
+	jc .cmdEndB
+	mov byte [_CD], 0x00
+	mov byte [_CD+1], 0x01
+	
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_DSKDAT:
+	db 'DSKDAT',0
+str_cmdh_DSKDAT:
+	db ' (?) Watch information about the current disk.',0
+cmd_DSKDAT:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+7]
+	jnz .comm
+	mov si, str_cmdh_DSKDAT
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.str_diskid:
+		db '  Disk ID: ',0
+	.str_SectorsPerTrack:
+		db '   > Sectors Per Track    : 0x',0
+	.str_NumHeads:
+		db '   > Number of Heads      : 0x',0
+	.str_NumCillinders:
+		db '   > Number of Cillinders : 0x',0
+
+	.comm:
+	
+	call PrintLn
+	
+	mov si, .str_diskid
+	call PrintString
+	mov al, byte [_CurrentDisk]
+	add al, byte '0'
+	mov ah,0x0e
+	int 10h
+	call PrintLn
+	
+	mov si, .str_SectorsPerTrack
+	call PrintString
+	mov al, byte [_SectorsPerTrack]
+	add al, byte '0'
+	mov ah,0x0e
+	int 10h
+	call PrintLn
+	
+	mov si, .str_NumHeads
+	call PrintString
+	mov al, byte [_NumHeads]
+	add al, byte '0'
+	mov ah,0x0e
+	int 10h
+	call PrintLn
+	
+	mov si, .str_NumCillinders
+	call PrintString
+	mov al, byte [_NumCillinders]
+	add al, byte '0'
+	mov ah,0x0e
+	int 10h
+	call PrintLn
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -427,7 +562,53 @@ cmd_EMP:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_FORMAT:
+	db 'FORMAT',0
+str_cmdh_FORMAT:
+	db ' (?) Erase all the disk data of the current disk, and format the disk as BRFS-32a.',0
+cmd_FORMAT:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+7]
+	jnz .comm
+	mov si, str_cmdh_FORMAT
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.str_booterr:
+		db 'You cannot format the system disk. If you want to restore the default system, try reinstalling it on this disk.',0
+	
+	.comm:
+	
+	mov bl, byte [_CurrentDisk]
+	
+	
+	cmp bl, byte [BOOT_DRIVE]
+	jnz .ok
+	
+	mov si, .str_booterr
+	call PrintStringLn
+	jmp .cmdEndG
+	
+	.ok:
+	call __ensure
+	cmp bl, byte 0
+	jnz .cmdEndB
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -463,7 +644,7 @@ cmd_INF:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -499,7 +680,7 @@ cmd_INFD:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -655,10 +836,96 @@ cmd_INF_holder:
 	.cmdEnd:
 	ret
 
+str_cmd_LD:
+	db 'LD',0
+str_cmdh_LD:
+	db ' (?) Watch the number of disks accessibles by the system. Use DSK to change the current disk.',0
+cmd_LD:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+3]
+	jnz .comm
+	mov si, str_cmdh_LD
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.str_diskettes:
+		db '  Available disks: ',0
+	.str_list:
+		db '   > Disk ',0
+	
+	.comm:
+	
+	int 11h
+	;                           Equipment code (AX)
+	;=============================================================================
+	; F E D C B A 9 8  7 6 5 4 3 2 1 0
+	; x x . . . . . .  . . . . . . . .  Number of printers installed
+	; . . x . . . . .  . . . . . . . .  Internal modem installed
+	; . . . x . . . .  . . . . . . . .  Game adapter installed? (always 1 on PCJr)
+	; . . . . x x x .  . . . . . . . .  Number of RS-232 ports
+	; . . . . . . . x  . . . . . . . .  Reserved
+	; . . . . . . . .  x x . . . . . .  Number of diskettes - 1 (i.e. 0=1 disk)
+	; . . . . . . . .  . . x x . . . .  Initial video mode (see below)
+	; . . . . . . . .  . . . . x . . .  Reserved
+	; . . . . . . . .  . . . . . x . .  Reserved
+	; . . . . . . . .  . . . . . . x .  Math coprocessor installed?
+	; . . . . . . . .  . . . . . . . x  1=diskettes present; 0=no disks present
+	
+	and al, 11000000b ; Esos dos digitos binarios indican el numero de disquetes que ;hay
+	shr al, 6
+	
+	add al, byte '1' ;Minimo uno
+	
+	call PrintLn
+	
+	mov si, .str_diskettes
+	call PrintString
+	mov ah, 0x0e
+	int 10h
+	
+	mov cl, al
+	mov al, byte '0'
+	.cdsk:
+		cmp al, cl
+		jge .exitCdsk
+		
+		call PrintLn
+		mov si, .str_list
+		call PrintString
+		mov ah, 0x0e
+		int 10h
+		
+		inc al
+		jmp .cdsk
+	.exitCdsk:
+	
+	call PrintLn
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
 str_cmd_LIST:
 	db 'LIST',0
 str_cmdh_LIST:
-	db ' (?) List the program in memory.',0
+	db ' (?) List the program in memory. You can use special arguments.',13
+	db '  Examples:',13
+	db '   > LIST',13
+	db '   > LIST 10',13
+	db '   > LIST 20-50',13
+	db '   > LIST -31',13
+	db '   > LIST 80-'
+	db 0
 cmd_LIST:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -679,7 +946,7 @@ cmd_LIST:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -786,7 +1053,7 @@ cmd_LOAD:
 	
 	.cmdEndB:
 	mov si, _str_cc_unkPath
-	call PrintStringLn
+	call PrintString
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -810,17 +1077,17 @@ cmd_MEM:
 	ret
 	
 	.str1:
-		db '   Memory size,  1K blocks (up to 640K)  :  $',0
+		db '   Memory size, 1K blocks (up to 640K)   :  0x',0
 	.memsize:
 		db 0,0,0,0
 		db 0
 	.str2:
-		db '   Accessibles by the system             :  $80 =$40+$40 [-2 bytes]',13
+		db '   Accessibles by the system             :  0x80 =0x40+0x40 [-2 bytes]',13
 		db 13
-		db '   Lower memory size   (0000 - 7E00)     :  $20',13
-		db '   System size         (7E00 - AA00)     :  $0B',13
-		db '   BASIC program space (AA00 - 10000)    :  $15',13
-		db '   Programs space      (10000 - 1FFFF)   :  $40 [-2 bytes]',0
+		db '   Lower memory size   (0000 - 7E00)     :  0x20',13
+		db '   System size         (7E00 - AA00)     :  0x0B',13
+		db '   BASIC program space (AA00 - 10000)    :  0x15',13
+		db '   Programs space      (10000 - 1FFFF)   :  0x40 [-2 bytes]',0
 	
 	
 	.comm:
@@ -874,7 +1141,7 @@ cmd_MEM:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -930,7 +1197,7 @@ cmd_NEW:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -1001,7 +1268,7 @@ cmd_OFF:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -1045,7 +1312,7 @@ cmd_PRE:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -1279,7 +1546,7 @@ cmd_RTX:
 	
 	.cmdEndB:
 	mov si, _str_cc_unkPath
-	call PrintStringLn
+	call PrintString
 	.cmdEndG:
 	call PrintLn
 	xor bx, bx
@@ -1310,7 +1577,7 @@ cmd_RUN:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -1342,7 +1609,7 @@ cmd_VER:
 	
 	jmp .cmdEndG
 	.cmdEndB:
-	mov bx, word 1
+	mov bh, byte 1
 	ret
 	.cmdEndG:
 	xor bx, bx
@@ -1352,7 +1619,8 @@ cmd_VER:
 str_cmd_WTX:
 	db 'WTX',0
 str_cmdh_WTX:
-	db ' (?) Write from console prompt to a specified text file (Argument 1). Ex.: WTX example.txt',0
+	db ' (?) Write from the console prompt to a specified text file (Argument 1).',13
+	db '     Ex.: WTX example.txt',0
 cmd_WTX:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1490,10 +1758,10 @@ _str_cc_knownPath:
 _str_cc_Unk:
 	db ' -- Este comando no esta terminado xD --',0
 _str_cc_version:
-	db ' FreeBASIC 0.1.1        published under GPL 3 license.',13
+	db ' FreeBASIC 0.5.1        published under GPL 3 license.',13
 	db 13
 	db ' > System               by Bruno Castro Garcia',13
-	db '   version 0.1          [bruno@retronomicon.gq]',13
+	db '   version 0.5          [bruno@retronomicon.gq]',13
 	db 13
 	db ' > BASIC Core           by Angel Ruiz Fernandez',13
 	db '   version 0.1          [aruizfernandez05@gmail.com]',13
