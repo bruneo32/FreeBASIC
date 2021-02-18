@@ -66,6 +66,10 @@ cmd_CAT:
 	ret
 	
 	.comm:
+	
+	cmp byte [__unreadable_disk], 0x00
+	jnz .unreadable
+	
 	jmp .starti
 	
 	;vars
@@ -76,13 +80,24 @@ cmd_CAT:
 	call _BRFS_ReadSectorCD
 	jc .cmdEnd
 	
-	call PrintLn
-	mov ah, 0x0e
-	mov al, ' '
-	xor bx, bx
-	mov cx, 0x10
+	mov bx, 0x0001
+	call MovCursorRel
+	
+	mov ah,0x0e
+	mov al, byte '['
 	int 10h
+	mov si, _CurrentLabel
+	call PrintString
+	mov ah,0x0e
+	mov al, byte ']'
+	int 10h
+	
+	call PrintLn
+	call PrintLn
+	mov bx, 0x0001
+	call MovCursorRel
 	.starti2:
+	mov cx, 0x000a ; Each 10 elements printed, __MORE__
 	mov si, _BRFS_TRS_
 	.loop:
 		cmp cx, byte 0
@@ -130,10 +145,8 @@ cmd_CAT:
 		.salto:
 			add si,2
 			call PrintLn
-			mov ah, 0x0e
-			mov al, ' '
-			xor bx, bx
-			int 10h
+			mov bx, 0x0001
+			call MovCursorRel
 			dec cx ; Para contar elementos
 			jmp .next
 		
@@ -187,6 +200,9 @@ cmd_CAT:
 	.cmdEndB:
 	mov bh, byte 1
 	ret
+	.unreadable:
+	mov si, _str_cc_unreadable
+	call PrintStringLn
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -218,6 +234,9 @@ cmd_CD:
 	cmp bh, [_InputBuffer+3]
 	jz .cmdEnd
 	
+	cmp byte [__unreadable_disk], 0x00
+	jnz .unreadable
+	
 	call _BRFS_ReadSectorCD
 	jc .cmdEnd
 	
@@ -237,6 +256,9 @@ cmd_CD:
 	mov si, _str_cc_unkPath
 	call PrintStringLn
 	ret
+	.unreadable:
+	mov si, _str_cc_unreadable
+	call PrintStringLn
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -491,6 +513,12 @@ cmd_DSKDAT:
 		db '   > Number of Heads      : 0x',0
 	.str_NumCillinders:
 		db '   > Number of Cillinders : 0x',0
+	.str_Subformat:
+		db '  BRFS Subformat          : BRFS-16a',13
+		db '   > Index labeling       : ASCII',13
+		db '   > Pointer size         : 16 bit',13
+		db '   > Attribute size       : 0x0'
+		db 0
 
 	.comm:
 	
@@ -528,10 +556,22 @@ cmd_DSKDAT:
 	int 10h
 	call PrintLn
 	
+	
+	cmp byte [__unreadable_disk], 0x00
+	jnz .unreadable
+	
+	call PrintLn
+	mov si, .str_Subformat
+	call PrintStringLn
+	
 	jmp .cmdEndG
 	.cmdEndB:
 	mov bh, byte 1
 	ret
+	.unreadable:
+	call PrintLn
+	mov si, _str_cc_unreadable
+	call PrintStringLn
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -572,7 +612,7 @@ cmd_EMP:
 str_cmd_FORMAT:
 	db 'FORMAT',0
 str_cmdh_FORMAT:
-	db ' (?) Erase all the disk data of the current disk, and format the disk as BRFS-32a.',0
+	db ' (?) Erase all the disk data of a disk, and format the disk as BRFS-32a.',0
 cmd_FORMAT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -591,9 +631,12 @@ cmd_FORMAT:
 	
 	.comm:
 	
-	mov bl, byte [_CurrentDisk]
+	mov bl, byte [_InputBuffer+7]
 	
+	cmp bl, byte 0
+	jz .cmdEndB
 	
+	sub bl, byte '0'
 	cmp bl, byte [BOOT_DRIVE]
 	jnz .ok
 	
@@ -707,6 +750,8 @@ cmd_INF_holder:
 	.TYPEE: db 0
 	
 	.comm:
+	cmp byte [__unreadable_disk], 0x00
+	jnz .unreadable
 	
 	mov byte [.TYPEE], bl
 	push si
@@ -828,6 +873,10 @@ cmd_INF_holder:
 	
 	jmp .cmdEndG
 	
+	.unreadable:
+	mov si, _str_cc_unreadable
+	call PrintStringLn
+	jmp .cmdEndG
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintStringLn
@@ -1462,6 +1511,9 @@ cmd_RTX:
 	cmp bh, [_InputBuffer+4]
 	jz .cmdEnd
 	
+	cmp byte [__unreadable_disk], 0x00
+	jnz .unreadable
+	
 	call _BRFS_ReadSectorCD
 	jc .cmdEndB
 	
@@ -1547,6 +1599,9 @@ cmd_RTX:
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintString
+	.unreadable:
+	mov si, _str_cc_unreadable
+	call PrintStringLn
 	.cmdEndG:
 	call PrintLn
 	xor bx, bx
@@ -1766,6 +1821,8 @@ _str_cc_version:
 	db ' > BASIC Core           by Angel Ruiz Fernandez',13
 	db '   version 0.1          [aruizfernandez05@gmail.com]',13
 	db 0
+_str_cc_unreadable:
+	db 'Unreadable disk. Use FORMAT command',0
 _str_cc_unsopportedf:
 	db 'Unsopported feature.',0
 _str__ensure:

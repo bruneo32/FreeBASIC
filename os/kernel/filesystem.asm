@@ -1,5 +1,9 @@
 _BRFS_TRS_ equ 0x7a00 ; 512 antes de 0x7c00
 _BRFS_TWS_ equ 0x7800 ; 512 antes de 0x7a00
+__unreadable_disk:	db 0
+_CurrentLabel:
+	times 11 db 0
+	db 0
 _CurrentDisk:
 	db 0
 _CD:
@@ -68,6 +72,41 @@ __GetDriveParameters:
 	mov [_NumCillinders], ch
 	mov [_SectorsPerTrack], cl
 	mov [_NumHeads], dh
+	
+	xor bx,bx
+	call _BRFS_ReadSector
+	
+	mov cl, byte 11
+	mov si, _BRFS_TRS_+43
+	mov di, _CurrentLabel
+	.loop:
+		cmp cl, byte 0
+		jz .exitLoop
+		
+		mov bl, byte [si]
+		mov byte [di], bl
+		
+		inc si
+		inc di
+		dec cl
+		jmp .loop
+	.exitLoop:
+	mov si, _BRFS_TRS_+62
+	cmp byte [si], 0x01
+	jnz .unreadable
+	inc si
+	cmp byte [si], 0x02
+	jnz .unreadable
+	inc si
+	cmp byte [si], 0x00
+	jnz .unreadable
+	
+	mov byte [__unreadable_disk], 0x00
+	
+	jmp .end
+	
+	.unreadable:
+	mov byte [__unreadable_disk], 0x01
 	
 	.end:
 	popa

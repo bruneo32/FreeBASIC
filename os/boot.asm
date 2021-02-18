@@ -25,8 +25,12 @@ EBPB: ; -------------------------------------------------
 	db 0						; reserved
 	db 0x69						; signature, maybe 0 or 29 or 28
 	dd 0						; volume ID
-	db 'FreeBASIC  '			; volume label, 11 bytes
+	db 'System Disk'			; volume label, 11 bytes
 	db 'BRFS    '				; file system type, 8 bytes
+BRFS: ; -------------------------------------------------
+	db 0x01 ; LABELING			; 00: Not BRFS, 01: ASCII, 02: UTF-8
+	db 0x02 ; Pointer size (in bytes)
+	db 0x00 ; Attributes size (in bytes)
 
 ; CODE
 START:
@@ -127,7 +131,7 @@ db 0x55,0xaa
 
 ; ROOT
 ROOT:
-db 'hola.txt',0x1c,0x00,0x1c
-db 'FOLDER',0x1d,0x00,0x1d
+db 'hola.txt',0x1c,0x00,0x1d
+db 'FOLDER',0x1d,0x00,0x1e
 
 times 512-($-ROOT) db 0

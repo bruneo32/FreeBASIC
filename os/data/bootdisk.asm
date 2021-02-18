@@ -27,6 +27,10 @@ EBPB: ; -------------------------------------------------
 	dd 0						; volume ID
 	db 'NO LABEL   '			; volume label, 11 bytes
 	db 'BRFS    '				; file system type, 8 bytes
+BRFS: ; -------------------------------------------------
+	db 0x01 ; LABELING			; 00: Not BRFS, 01: ASCII, 02: UTF-8
+	db 0x02 ; Pointer size (in bytes)
+	db 0x00 ; Attributes size (in bytes)
 
 ; CODE
 START:
@@ -37,7 +41,7 @@ times 510-($-$$) db 0
 db 0x55,0xaa
 
 ROOT:
-db 'file',0x1c,0x00,0x06
+db 'file',0x1c,0x00,0x05
 
 times 4*512-($-ROOT) db 0
 
