@@ -67,9 +67,6 @@ cmd_CAT:
 	
 	.comm:
 	
-	cmp byte [__unreadable_disk], 0x00
-	jnz .unreadable
-	
 	jmp .starti
 	
 	;vars
@@ -79,6 +76,9 @@ cmd_CAT:
 	.starti:
 	call _BRFS_ReadSectorCD
 	jc .cmdEnd
+	
+	cmp byte [__unreadable_disk], 0x00
+	jnz .unreadable
 	
 	mov bx, 0x0001
 	call MovCursorRel
@@ -407,12 +407,12 @@ cmd_COLOR:
 	
 	.nextm2:
 	cmp bh, byte '9'
-	jl .nextm1
+	jle .nextm1
 	cmp bh, byte 'A'
 	jl .cmdEndB
 	.nextm1:
 	cmp bl, byte '9'
-	jl .next0
+	jle .next0
 	cmp bl, byte 'A'
 	jl .cmdEndB
 	
@@ -473,10 +473,14 @@ cmd_DSK:
 	mov bl, byte [BOOT_DRIVE]
 	jmp .su
 	
-	cmp bl, byte '0'
-	jl .cmdEndB
-	
 	.si:
+	cmp bl, byte 'A'
+	jb .floppy
+	
+	add bl, 63 ; Force x80
+	jmp .su
+	
+	.floppy:
 	sub bl, byte '0'
 	
 	.su:
@@ -516,16 +520,18 @@ cmd_DSKDAT:
 	.str_diskid:
 		db '  Disk ID: ',0
 	.str_SectorsPerTrack:
-		db '   > Sectors Per Track    : 0x',0
+		db '   > Sectors Per Track    : $',0
 	.str_NumHeads:
-		db '   > Number of Heads      : 0x',0
+		db '   > Number of Heads      : $',0
 	.str_NumCillinders:
-		db '   > Number of Cillinders : 0x',0
+		db '   > Number of Cillinders : $',0
+	.str_label:
+		db '  LABEL: ',0
 	.str_Subformat:
 		db '  BRFS Subformat          : BRFS-16a',13
 		db '   > Index labeling       : ASCII',13
 		db '   > Pointer size         : 16 bit',13
-		db '   > Attribute size       : 0x0'
+		db '   > Attribute size       : $0'
 		db 0
 
 	.comm:
@@ -535,7 +541,13 @@ cmd_DSKDAT:
 	mov si, .str_diskid
 	call PrintString
 	mov al, byte [_CurrentDisk]
+	cmp al, byte 0x80
+	jb .si
+	sub al, byte 63
+	jmp .prr
+	.si:
 	add al, byte '0'
+	.prr:
 	mov ah,0x0e
 	int 10h
 	call PrintLn
@@ -563,7 +575,12 @@ cmd_DSKDAT:
 	mov ah,0x0e
 	int 10h
 	call PrintLn
+	call PrintLn
 	
+	mov si, .str_label
+	call PrintString
+	mov si, _CurrentLabel
+	call PrintStringLn
 	
 	cmp byte [__unreadable_disk], 0x00
 	jnz .unreadable
@@ -578,6 +595,8 @@ cmd_DSKDAT:
 	ret
 	.unreadable:
 	call PrintLn
+	mov bx, 0x0002
+	call MovCursorRel
 	mov si, _str_cc_unreadable
 	call PrintStringLn
 	.cmdEndG:
@@ -636,6 +655,8 @@ cmd_FORMAT:
 	
 	.str_booterr:
 		db 'You cannot format the system disk. If you want to restore the default system, try reinstalling it on this disk.',0
+	.str_label:
+		db 'LABEL? ',0
 	
 	.comm:
 	
@@ -644,7 +665,15 @@ cmd_FORMAT:
 	cmp bl, byte 0
 	jz .cmdEndB
 	
+	cmp bl, byte 'A'
+	jl .floppy
+	
+	add bl, 63 ; Force x80
+	jmp .prr
+	
+	.floppy:
 	sub bl, byte '0'
+	.prr:
 	cmp bl, byte [BOOT_DRIVE]
 	jnz .ok
 	
@@ -653,9 +682,23 @@ cmd_FORMAT:
 	jmp .cmdEndG
 	
 	.ok:
+	push bx
 	call __ensure
 	cmp bl, byte 0
 	jnz .cmdEndB
+	
+	; xor bx,bx
+	; call _BRFS_ReadSector
+	
+	; pop dx
+	; xor bx,bx
+	; mov es,bx
+	; mov bx, _BRFS_TRS_
+	; xor cx,cx
+	; xor dh,dh
+	; mov al, 0x01
+	; mov ah, 0x03
+	; int 13h
 	
 	jmp .cmdEndG
 	.cmdEndB:
@@ -963,7 +1006,14 @@ cmd_LD:
 		call PrintLn
 		mov si, .str_list
 		call PrintString
+		cmp al, byte 0x80 ; Hard Drive
+		jb .floppy
+		sub al, 63
+		; Force to 'A'
+		jmp .prr
+		.floppy:
 		add al, byte '0'
+		.prr:
 		mov ah, 0x0e
 		int 10h
 		

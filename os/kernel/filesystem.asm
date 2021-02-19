@@ -65,6 +65,7 @@ __GetDriveParameters:
 	; DL - Drive Number
 	pusha
 	
+	clc
 	mov ah, 0x08
 	int 13h
 	jc .end
