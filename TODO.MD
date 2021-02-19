@@ -4,6 +4,7 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
+- CTRL chars
 - Apagado ACPI
 - Borrar linea en BASIC
 - Comandos de archivos
