@@ -7,11 +7,12 @@
 - Apagado ACPI
 - Borrar linea en BASIC
 - Comandos de archivos
-- Comandos de disco
+- Comando FORMAT
 - BRFS de 4GB
 - TEMPLATES
 
 # Done
+- Comandos de disco
 - COLOR Command
 - Basic LIST
 - List single line
