@@ -4,10 +4,11 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
+- Comandos de archivos
+- Arreglar GetElementFromDir
+- Comando FORMAT
 - Apagado ACPI
 - Borrar linea en BASIC
-- Comandos de archivos
-- Comando FORMAT
 - BRFS de 4GB
 - TEMPLATES
 
