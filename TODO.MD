@@ -4,7 +4,6 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
-- CTRL chars
 - Apagado ACPI
 - Borrar linea en BASIC
 - Comandos de archivos
@@ -13,6 +12,7 @@
 - TEMPLATES
 
 # Done
+- CTRL chars
 - Comandos de disco
 - COLOR Command
 - Basic LIST
