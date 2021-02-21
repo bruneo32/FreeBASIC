@@ -9,6 +9,13 @@ Then concatenates into `/bootloader.flp` raw floppy image.
 Run `./os/basic/make.sh`
 Generates `/os/basic/interpret.bin` flat binary, and `/os/basic/interpret` elf32 to be included by the kernel
 
+## Limitations
+```
+Maximum BASIC line length:            300     characters
+Maximum BASIC lines:                  65536   lines
+Maximum BASIC program length:         12287   characters (with NUL)
+```
+
 ## Memory map
 ```
                     /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  
