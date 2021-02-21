@@ -9,6 +9,7 @@
 - Comando FORMAT
 - Apagado ACPI
 - Borrar linea en BASIC
+- Pruebas de estrés al sistema de archivos
 - BRFS de 4GB
 - TEMPLATES
 
