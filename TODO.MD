@@ -5,7 +5,6 @@
 
 # TODO: System
 - Comandos de archivos
-- Arreglar GetElementFromDir
 - Comando FORMAT
 - Apagado ACPI
 - Borrar linea en BASIC
@@ -14,6 +13,7 @@
 - TEMPLATES
 
 # Done
+- Arreglar GetElementFromDir
 - CTRL chars
 - Comandos de disco
 - COLOR Command
