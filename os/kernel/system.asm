@@ -138,13 +138,26 @@ _sys_shutdown:
     mov bx, 0x0001
     mov cx, 0x0003
     int 0x15
-	jc .error
+	;jc .end
+	
+	mov cx, 0x002d ; 3 SECONDS
+	mov dx, 0xc6c0
+	call _sys_wait
 	
 	; ACPI (if APM didnt work)
 	; ???
 	
-	.error:
-	ret
+	mov cx, 0x002d ; 3 SECONDS
+	mov dx, 0xc6c0
+	call _sys_wait
+	
+	call PrintLn
+	call PrintLn
+	mov si, _sys_offnt
+	call PrintStringLn
+	
+	.end:
+	jmp word [0x7f16] ; Exit
 
 ; DATOS
 _sys_time:
@@ -153,3 +166,5 @@ _sys_time:
 _sys_date:
 	db '0000-00-00'
 	db 0
+_sys_offnt:
+	db 'It was impossible to shut down the computer. Press and hold the POWER key for a few seconds to power off.',0

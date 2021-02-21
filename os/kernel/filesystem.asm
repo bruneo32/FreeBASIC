@@ -8,6 +8,8 @@ _CurrentDisk:
 	db 0
 _CD:
 	db 0x00,0x01 ; Root
+_FreeSector:
+	db 0x00,0x00
 _str_diskerror:
 	db 'Disk Read Error',0
 
@@ -117,18 +119,7 @@ _BRFS_ReadSector:
 	; Adress in BH:BL
 	call LBA2CHS
 	
-	mov bx, _BRFS_TRS_
-	mov cx, 512
-	.clear:
-		cmp cx, word 0
-		jz .exitClear
-		dec cx
-		
-		mov [bx], byte 0
-		
-		inc bx
-		jmp .clear
-	.exitClear:
+	call _BRFS_ClearTRS
 	
 	clc
 	xor ax, ax ; Reset
@@ -167,6 +158,7 @@ DiskError:
 	mov si, _str_diskerror
 	call PrintStringLn
 	
+	jmp word [0x7f16] ; Exit
 	ret
 
 _BRFS_GetElementFromDir:
@@ -181,6 +173,8 @@ _BRFS_GetElementFromDir:
 		db 0,0
 	.stopc:
 		db 0
+	.veto:
+		db 0
 	
 	.starti:
 	mov [.stopc], bl
@@ -190,6 +184,7 @@ _BRFS_GetElementFromDir:
 	mov bx, word [_CD]
 	mov [._c], bh
 	mov [._c+1], bl
+	mov byte [.veto], 0x00
 	.starti2:
 	mov bh, [.almac]
 	mov bl, [.almac+1]
@@ -200,6 +195,25 @@ _BRFS_GetElementFromDir:
 		cmp di, _BRFS_TRS_+510
 		jae .exitLoop ; Hay que leer más sectores
 		
+		cmp [di], byte 0
+		jz .next
+		
+		cmp byte [.veto], byte 0
+		jz .ok
+		
+		cmp [di], byte 0x1c
+		jz .fod
+		cmp [di], byte 0x1d
+		jz .fod
+		
+		jmp .next
+		
+		.fod:
+		add di, 2
+		mov byte [.veto], 0x00
+		jmp .next
+		
+		.ok:
 		mov bl, [si]
 		cmp bl, [di]
 		jnz .fnext
@@ -231,6 +245,7 @@ _BRFS_GetElementFromDir:
 		mov bh, [.almac]
 		mov bl, [.almac+1]
 		mov si, bx
+		mov byte [.veto], 0x01
 		.next:
 		inc di
 		jmp .loop
@@ -251,7 +266,7 @@ _BRFS_GetElementFromDir:
 	jmp .end
 	
 	.leermas1:
-	mov bx, word [._c] ; Lo habiamos guardado en DX
+	mov bx, word [._c]
 	inc bx
 	mov [._c], bh
 	mov [._c+1], bl
@@ -287,5 +302,164 @@ _BRFS_MoveReaded:
 		jmp .loop
 	.exitLoop:
 	
+	popa
+	ret
+
+_BRFS_GetFreeSector:
+	pusha
+	
+	mov [_FreeSector], word 0
+	mov bx, 0x001d ; OS
+	
+	.read:
+		call _BRFS_ReadSector
+		cmp byte [_BRFS_TRS_], byte 0
+		jz .GG
+		
+		cmp bx, 0xFFFF
+		jz .end
+		
+		inc bx
+		jmp .read
+	.GG:
+	mov [_FreeSector], bh
+	mov [_FreeSector+1], bl
+	.end:
+	popa
+	ret
+
+_BRFS_ClearTRS:
+	pusha
+	mov si, _BRFS_TRS_
+	.loop:
+		mov [si], byte 0
+		inc si
+		cmp si, _BRFS_TRS_+512
+		jb .loop
+	popa
+	ret
+_BRFS_ClearTWS:
+	pusha
+	mov si, _BRFS_TWS_
+	.loop:
+		mov [si], byte 0
+		inc si
+		cmp si, _BRFS_TWS_+512
+		jb .loop
+	popa
+	ret
+
+_BRFS_CreateEntry:
+	; SI:	Entry Name
+	; BL:	Type (0x1c | 0x1d)
+	; DI:	Sector
+	
+	pusha
+	
+	mov dx, word [_CD]
+	
+	mov word [._eind], si
+	mov word [._esec], di
+	mov word [._modsec], dx
+	mov byte [._type], bl
+	
+	jmp .starti
+	
+	._type:	db 0
+	._eind:	dw 0
+	._esec:	dw 0
+	._modsec:	dw 0
+	
+	.starti:
+	call _BRFS_ReadSectorCD
+	jc .error
+	
+	mov di, word [._eind]
+	mov si, _BRFS_TRS_
+	.loop:
+		cmp si, _BRFS_TRS_+510
+		jae .exitLoop
+		
+		cmp [si], byte 0x1c
+		jz .n0
+		cmp [si], byte 0x1d
+		jnz .n1
+		
+		.n0:
+		add si, 2
+		jmp .next
+		
+		.n1:
+		cmp si, _BRFS_TRS_+510
+		jae .exitLoop
+		
+		cmp [si], byte 0
+		jnz .next
+		
+		
+		; Store
+		mov bl, [di]
+		mov [si], bl
+		
+		inc di
+		cmp [di], byte 0
+		jnz .next
+		
+		;PTR
+		inc si
+			cmp si, _BRFS_TRS_+510
+			jae .exitLoop
+		mov bl, byte [._type]
+		mov byte [si], bl
+		inc si
+			cmp si, _BRFS_TRS_+510
+			jae .exitLoop
+		mov bl, byte [._esec]
+		mov byte [si], bl
+		inc si
+			cmp si, _BRFS_TRS_+510
+			jae .exitLoop
+		mov bl, byte [._esec+1]
+		mov byte [si], bl
+		
+		call .store
+		jmp .end
+		
+		.next:
+		inc si
+		jmp .loop
+	.exitLoop:
+	mov si, _BRFS_TRS_+510
+	; Leer mas
+	
+	jmp .end
+	
+	.store:
+		mov bx, word [._modsec]
+		rol bx, 8
+		call LBA2CHS
+		
+		xor bx,bx
+		mov es, bx
+		mov bx, _BRFS_TRS_
+		
+		mov ch, [_lba_C] ; Cilindro.
+		mov dh, [_lba_H] ; Cabeza.
+		mov cl, [_lba_S] ; Sector
+		mov dl, [_CurrentDisk]
+		
+		mov al, 0x01 ; Count
+		mov ah, 0x03
+		int 13h
+		jc .error
+		
+		cmp al, 0x01
+		jnz .error
+		ret
+	
+	.error:
+	call DiskError
+	stc
+	.end:
 	popa
 	ret

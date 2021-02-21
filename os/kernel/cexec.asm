@@ -163,6 +163,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	PRT
+	mov si, _InputBuffer
+	mov di, str_cmd_PRT
+	call iStringCompareSpace
+	call cmd_PRT
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	RTX
 	mov si, _InputBuffer
 	mov di, str_cmd_RTX
@@ -176,6 +184,14 @@ _con_exec:
 	mov di, str_cmd_RUN
 	call iStringCompareSpace
 	call cmd_RUN
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
+	;	SYS
+	mov si, _InputBuffer
+	mov di, str_cmd_SYS
+	call iStringCompareSpace
+	call cmd_SYS
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
@@ -296,14 +312,13 @@ TryCommandOrBas:
 	
 	.com:
 	; Commando
-	mov si, _InputBuffer
 	call _con_exec
 	
 	.end:
 	ret
 
 _str_basicoverflow:
-	db '[ERROR] BASIC program overflow, you reached 0xFFFF.',0
+	db '[ERROR] BASIC program overflow, you exceded 12KB and reached 0xDA00.',0
 
 _str_nocom:
 	db '[Error] Unknown or invalid command.',0

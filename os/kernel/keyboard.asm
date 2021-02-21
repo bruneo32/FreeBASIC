@@ -21,8 +21,8 @@ GetPromptString:
 		
 		; Ojo con algunos caracteres
 		cmp al, 32 ; SPACE, todos los anteriores son caracteres de control
-		jb .continueLoop
-		cmp al, 0x7f ; DEL, todos los siguiente
+		jb ._ctrlChar
+		cmp al, 0x7f ; DEL
 		jz .continueLoop
 		
 		; Display
@@ -43,16 +43,38 @@ GetPromptString:
 		; RUTIS
 		._key_backspace:
 			cmp bx, _InputBuffer ; No borrar en el 0
-			jle .continueLoop
+			jbe .continueLoop
 			; Arreglar la memoria (_InputBuffer)
 			dec bx
+			mov dl, byte [bx]
 			mov [bx], byte 0
 			; Arreglar el display
+			cmp dl, byte ' '
+			jae .uno
+			; SPECIAL CHAR DELETES 2
 			mov ah, 0x0e
 			int 0x10
 			mov al, 0 ; SUPRIMIR
 			int 0x10
 			mov al, 8 ; IZDA
+			int 0x10
+			.uno:
+			mov ah, 0x0e
+			int 0x10
+			mov al, 0 ; SUPRIMIR
+			int 0x10
+			mov al, 8 ; IZDA
+			int 0x10
+			jmp .continueLoop
+		._ctrlChar:
+			mov dl, al
+			mov [bx], al
+			inc bx
+			mov ah, 0x0e
+			mov al, byte '^'
+			int 0x10
+			add dl, 65
+			mov al, dl
 			int 0x10
 			jmp .continueLoop
 	
@@ -115,6 +137,29 @@ GetChar:
 	
 	
 	.noALT:
+	; Check CTRL
+	mov ah, 02h
+	int 16h
+	and al, byte 00000100b
+	cmp al, 00000100b ; CTRL
+	jnz .noCTRL
+	
+	; Obtener caracter
+	mov ah, 00h
+	int 16h
+	
+	; Verificar
+	cmp al, 0x01 ; A
+	jl .noALT
+	cmp al, 0x1a ; Z
+	jg .noALT
+	
+	; Convertir
+	dec al ; ^A = NUL
+	
+	jmp .end
+	
+	.noCTRL:
 	mov ah, 00h
 	int 16h
 	

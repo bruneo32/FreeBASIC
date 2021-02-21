@@ -30,7 +30,7 @@ COLOR:
 SafeRect:
 	;  ROW  COL
 	db 0x03,0x05 ; Top-left corner
-	db 0x15,0x49 ; Bottom-right corner
+	db 0x15,0x45 ; Bottom-right corner
 str_pretext:
 	db ''
 	times 6-($-str_pretext) db 0

@@ -38,7 +38,7 @@ START:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Crear stack y demás cosas iniciales
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-PROGRAM_SPACE equ 0x7e00
+SYSTEM_SPACE equ 0x7e00
 xor ax, ax
 mov ds, ax
 mov es, ax
@@ -58,7 +58,7 @@ mov [BOOT_DRIVE], dl
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Leer segundo sector en PROGRAM_SPACE
+; Leer segundo sector en SYSTEM_SPACE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SECTORS equ 0x16 ; Sectors to read. x16 = 22 dec (ver: main.asm ~final)
 xor ax, ax ; Reset disk
@@ -66,7 +66,7 @@ int 13h
 
 xor bx, bx
 mov es, bx
-mov bx, PROGRAM_SPACE
+mov bx, SYSTEM_SPACE
 mov al, SECTORS
 mov ch, 0x00 ; C
 mov dh, 0x00 ; H
@@ -89,7 +89,7 @@ jnz DiskError
 ; que pueda obtener los parametros
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 mov dl, [BOOT_DRIVE]
-jmp 0:PROGRAM_SPACE
+jmp 0:SYSTEM_SPACE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Terminar cualquier ejecucion
@@ -133,5 +133,7 @@ db 0x55,0xaa
 ROOT:
 db 'hola.txt',0x1c,0x00,0x1d
 db 'FOLDER',0x1d,0x00,0x1e
+db 'appleii.tmp',0x1c,0x00,0x24
+db 'com64.tmp',0x1c,0x00,0x25
 
 times 512-($-ROOT) db 0

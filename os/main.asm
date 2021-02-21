@@ -1,6 +1,7 @@
 [org 0x7e00]
 
 BasicSpace equ 0xAA00
+ProgramSpace equ 0xDA00
 GeneralSpace equ 0x10000
 BASCORE_SIZE equ 5
 
@@ -35,7 +36,11 @@ int 10h
 call ConsoleClear
 call CustomConsole ; Clear + TEMPLATE
 
+
+
+
 MainLoop:
+	call PrintLn
 	mov si, str_pretext
 	call PrintString
 	
@@ -45,8 +50,9 @@ MainLoop:
 	; EJECUTAR COMANDO
 	call TryCommandOrBas
 	
-	call PrintLn
 	jmp MainLoop
+
+
 
 ; Si por algún motivo se pasa, detener
 cli
@@ -83,6 +89,8 @@ KIT: ; KIT, Kernel Interface Table
 	dw __more
 	dw ExtendedStore
 	dw ExtendedLoad
+	dw BasicProgramCounter
+	dw MainLoop
 	
 	times 32-($-KIT) db 0
 	db 0x5a,0x7a ; KIT/MIT End Signature
@@ -90,7 +98,7 @@ KIT: ; KIT, Kernel Interface Table
 BasicProgramCounter: dw BasicSpace
 
 
-%include "templates/appleii.asm"
+%include "templates/default.asm"
 %include "kernel/kernel.asm"
 %include "basic/mit.asm" ; Module Interface Table
 

@@ -5,7 +5,7 @@ str_cmds:
 	db '  > LIST, LOAD, NEW, RUN, SAVE',13
 	db 13
 	db ' Commands about system:',13
-	db '  > CDT, CLS, COLOR, HELP, MEM, OFF, PRE, PRG, SYS, VER',13
+	db '  > CDT, CLS, COLOR, HELP, MEM, OFF, PRE, PRG, PRT, RASM, SYS, TEMP, VER',13
 	db 13
 	db ' Commands about filesystem:',13
 	db '  > CAT, CD, DEL, DELD, MD, REN, REND, RTX, WTX',13
@@ -211,7 +211,7 @@ cmd_CAT:
 str_cmd_CD:
 	db 'CD',0
 str_cmdh_CD:
-	db ' (?) Change the current system path. See: CAT.',0
+	db ' (?) Change the current system path [Case sensitive]. See: CAT.',0
 cmd_CD:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -736,12 +736,6 @@ cmd_INF:
 	mov si, _InputBuffer+4
 	call cmd_INF_holder
 	
-	jmp .cmdEndG
-	.cmdEndB:
-	mov bh, byte 1
-	ret
-	.cmdEndG:
-	xor bx, bx
 	.cmdEnd:
 	ret
 
@@ -772,12 +766,6 @@ cmd_INFD:
 	mov si, _InputBuffer+5
 	call cmd_INF_holder
 	
-	jmp .cmdEndG
-	.cmdEndB:
-	mov bh, byte 1
-	ret
-	.cmdEndG:
-	xor bx, bx
 	.cmdEnd:
 	ret
 
@@ -809,7 +797,7 @@ cmd_INF_holder:
 	
 	; Buscar si existe
 	call _BRFS_ReadSectorCD
-	jc .cmdEnd
+	jc .cmdEndG
 	mov bl, byte [.TYPEE]
 	pop si
 	call _BRFS_GetElementFromDir
@@ -856,7 +844,7 @@ cmd_INF_holder:
 		mov bh, dh
 		mov bl, dl
 		call _BRFS_ReadSector
-		jc .cmdEndB
+		jc .cmdEndG
 		
 		mov si, _BRFS_TRS_+510
 		cmp [si], byte 0
@@ -1205,8 +1193,9 @@ cmd_MEM:
 		db 13
 		db '   Lower memory size   (0000 - 7E00)     :  0x20',13
 		db '   System size         (7E00 - AA00)     :  0x0B',13
-		db '   BASIC program space (AA00 - 10000)    :  0x15',13
-		db '   Programs space      (10000 - 1FFFF)   :  0x40 [-2 bytes]',0
+		db '   BASIC program space (AA00 - DA00)     :  0x0C',13
+		db '   Programs Space      (DA00 - 10000)    :  0x09',13
+		db '   Extended Space      (10000 - 1FFFF)   :  0x40 [-2 bytes]',0
 	
 	
 	.comm:
@@ -1299,7 +1288,7 @@ cmd_NEW:
 	mov si, BasicSpace
 	.loopi:
 		; Limitar
-		mov bx, 0xce00
+		mov bx, 0xda00
 		cmp di, bx ; BasicSpace Limit
 		jae .exitLoop
 		
@@ -1379,9 +1368,8 @@ cmd_OFF:
 	mov si, _str_cc_OFF2
 	call PrintString
 	
-	mov cx, 0x002d ; 3 SECONDS
-	mov dx, 0xc6c0
-	call _sys_wait
+	mov cx, 0x1000 ; 1 SECOND
+	call Sleep
 	
 	call _sys_shutdown
 	
@@ -1441,7 +1429,7 @@ cmd_PRE:
 str_cmd_PRG:
 	db 'PRG',0
 str_cmdh_PRG:
-	db ' (?) Load a compiled program file (*.prg) into 0x10000, and the runs it.',0
+	db ' (?) Load a compiled program file (*.prg) into 0xDA00, and the execute it.',0
 cmd_PRG:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1484,7 +1472,7 @@ cmd_PRG:
 	call _BRFS_ReadSector
 	jc .cmdEndB
 	
-	mov di, 0x0000
+	mov di, ProgramSpace
 	.starti2:
 	mov si, _BRFS_TRS_
 	.loop:
@@ -1492,10 +1480,7 @@ cmd_PRG:
 		jz .exitLoop
 		
 		mov al, byte [si]
-		push si
-		mov si, di
-		call ExtendedStore
-		pop si
+		mov [di], al
 		
 		.next:
 		inc si
@@ -1504,19 +1489,9 @@ cmd_PRG:
 	.exitLoop:
 	; Verificar si hay más
 	
-	xor bh, bh
-	cmp bh, [si]
-	jnz .msg_leermas
-	cmp bh, [si+1]
-	jnz .msg_leermas
 	
 	; Transfer control
-	mov bx, 0xFFFF
-	mov di, 0x0001
-	mov es, bx
-	;call 0:
-	
-	
+	call 0:ProgramSpace
 	
 	jmp .cmdEndG
 	
@@ -1547,6 +1522,38 @@ cmd_PRG:
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintStringLn
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_PRT:
+	db 'PRT',0
+str_cmdh_PRT:
+	db ' (?) Print a string.',0
+cmd_PRT:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_PRT
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.comm:
+	
+	mov si, _InputBuffer+4
+	call PrintStringLn
+	
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
+	ret
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -1585,7 +1592,7 @@ cmd_RTX:
 	jnz .unreadable
 	
 	call _BRFS_ReadSectorCD
-	jc .cmdEndB
+	jc .cmdEnd
 	
 	; Buscar si existe
 	mov bl, 0x1c ; Fichero
@@ -1599,7 +1606,7 @@ cmd_RTX:
 	mov bh, dh
 	mov bl, dl
 	call _BRFS_ReadSector
-	jc .cmdEndB
+	jc .cmdEnd
 	
 	.starti2:
 	mov si, _BRFS_TRS_
@@ -1666,12 +1673,13 @@ cmd_RTX:
 	call _BRFS_ReadSector
 	jmp .starti2
 	
+	.unreadable:
+	mov si, _str_cc_unreadable
+	call PrintString
+	jmp .cmdEndG
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintString
-	.unreadable:
-	mov si, _str_cc_unreadable
-	call PrintStringLn
 	.cmdEndG:
 	call PrintLn
 	xor bx, bx
@@ -1704,6 +1712,46 @@ cmd_RUN:
 	.cmdEndB:
 	mov bh, byte 1
 	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_SYS:
+	db 'SYS',0
+str_cmdh_SYS:
+	db ' (?) Transfer the control to a specific position (4 hex-digit) of the memory. Example: SYS DA00. Only uppercase.',0
+cmd_SYS:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_SYS
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	
+	.comm:
+	
+	mov bh, byte 0
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEndG
+	mov bh, 13 ; .cmd files
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEndG
+	
+	; Transfer control
+	;call 0:ProgramSpace
+	
+	jmp .cmdEndG
+	
+	.cmdEndB:
+	mov si, _str_cc_unkPath
+	call PrintStringLn
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -1745,7 +1793,8 @@ str_cmd_WTX:
 	db 'WTX',0
 str_cmdh_WTX:
 	db ' (?) Write from the console prompt to a specified text file (Argument 1).',13
-	db '     Ex.: WTX example.txt',0
+	db '     Ex.: WTX example.txt',13
+	db '     Press CTRL+Z and hit ENTER to finish writing.',0
 cmd_WTX:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1761,6 +1810,7 @@ cmd_WTX:
 	
 	; vars
 	._c:	dw 0
+	._p:	db 0
 	
 	.comm:
 	
@@ -1781,19 +1831,90 @@ cmd_WTX:
 	jnc .cmdEndB ; Ya existe
 	
 	
+	call _BRFS_GetFreeSector
+	; Check error
+	
+	mov si, _InputBuffer+4
+	mov bl, byte 0x1c
+	mov di, word [_FreeSector]
+	call _BRFS_CreateEntry
+	
+	jmp .cmdEndG
+	
+	mov byte [._p], 0x00
 	.starti2:
-	mov si, _BRFS_TRS_
+	call _BRFS_ClearTWS
+	mov si, _BRFS_TWS_
 	.loop:
-		cmp si, _BRFS_TRS_+510
+		cmp si, _BRFS_TWS_+510
 		jz .exitLoop
 		
+		.GC:
+		call GetChar
+		cmp al, byte 13
+		jz .enter
+		cmp al, byte 8 ; Backspace
+		jz .GC
+		cmp al, byte 32
+		jb .spChar
 		
+		.esc:
+		mov ah, 0x0e
+		int 10h
 		
+		jmp .store
+		
+		.enter:
+		call PrintLn
+		mov bl, byte 25
+		cmp bl, byte [._p] ; ^Z
+		jnz .store
+		
+		; END WRITTING
+		; write TWS in disk
+		jmp .cmdEndG
+		
+		.spChar:
+		mov [si], al
+		mov byte [._p], al
+		mov bl, al
+		mov ah, 0x0e
+		mov al, byte '^'
+		int 10h
+		add bl, 65
+		mov al, bl
+		int 10h
+		jmp .next
+		
+		.store:
+		mov [si], al
+		mov byte [._p], al
 		.next:
 		inc si
 		jmp .loop
 	.exitLoop:
-	jmp .cmdEndG
+	; Verify if the next sector is free
+	mov bx, word [_FreeSector]
+	inc bx
+	call _BRFS_ReadSector
+	cmp byte [_BRFS_TRS_], byte 0
+	jnz .FF
+	
+	mov byte [si], 0x00
+	mov byte [si+1], 0x01
+	jmp .ww
+	
+	.FF:
+	call _BRFS_GetFreeSector
+	; Check error
+	mov bl, byte [_FreeSector]
+	mov byte [si], bl
+	mov bl, byte [_FreeSector+1]
+	mov byte [si+1], bl
+	
+	.ww:
+	; write TWS in disk
+	jmp .starti2
 	
 	.cmdEndB:
 	mov si, _str_cc_knownPath
@@ -1804,6 +1925,7 @@ cmd_WTX:
 	ret
 
 __ensure:
+	pusha
 	mov si, _str__ensure
 	call PrintString
 	
@@ -1812,6 +1934,7 @@ __ensure:
 	cmp al, 13
 	jz .exitgc
 	
+	popa ; Ojo con el stack
 	mov bl, 0x01 ; Ha pulsado otra tecla
 	jmp .end
 	
@@ -1820,14 +1943,17 @@ __ensure:
 	mov si, _str__OK
 	call PrintString
 	
+	popa
 	xor bl, bl ; GG
 	.end:
 	call PrintLn
 	ret
 __more:
+	pusha
 	call GetCursorPos
 	mov dh, [_CursorRow]
 	mov dl, [_CursorCol]
+	;dec dh
 	push dx
 	
 	call PrintLn
@@ -1839,6 +1965,7 @@ __more:
 	jz .exitgc
 	
 	pop dx ; Ojito con el stack
+	popa
 	mov bl, 0x01 ; Ha pulsado otra tecla
 	jmp .end
 	
@@ -1867,6 +1994,7 @@ __more:
 	pop dx
 	call SetCursorPos
 	
+	popa
 	xor bl, bl ; GG
 	.end:
 	ret
@@ -1889,7 +2017,7 @@ _str_cc_version:
 	db '   version 0.5          [bruno@retronomicon.gq]',13
 	db 13
 	db ' > BASIC Core           by Angel Ruiz Fernandez',13
-	db '   version 0.1          [aruizfernandez05@gmail.com]',13
+	db '   version 0.1          [aruizfernandez05@gmail.com]'
 	db 0
 _str_cc_unreadable:
 	db 'Unreadable disk. Use FORMAT command',0
