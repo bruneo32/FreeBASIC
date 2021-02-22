@@ -4,15 +4,15 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
+- Sistema de archivos goes brrrrr en el sector 0x0024
 - Comandos de archivos
 - Comando FORMAT
 - Apagado ACPI
-- Borrar linea en BASIC
-- Pruebas de estrés al sistema de archivos
 - BRFS de 4GB
 - TEMPLATES
 
 # Done
+- Borrar linea en BASIC
 - Arreglar GetElementFromDir
 - CTRL chars
 - Comandos de disco
