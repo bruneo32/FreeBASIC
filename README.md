@@ -12,7 +12,7 @@ Generates `/os/basic/interpret.bin` flat binary, and `/os/basic/interpret` elf32
 ## Limitations
 ```
 Maximum BASIC line length:            300     characters
-Maximum BASIC lines:                  65536   lines
+Maximum BASIC line number:            65536
 Maximum BASIC program length:         12287   characters (with NUL)
 ```
 
