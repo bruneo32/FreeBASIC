@@ -4,11 +4,11 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
-- Sistema de archivos goes brrrrr en el sector 0x0024
+- MORE para HELP?
 - Comandos de archivos
 - Comando FORMAT
 - Apagado ACPI
-- BRFS de 4GB
+- BRFS de 32 bits
 - TEMPLATES
 
 # Done
