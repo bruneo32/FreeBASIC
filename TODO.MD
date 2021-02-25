@@ -4,6 +4,7 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
+- Problema X
 - MORE para HELP?
 - Comandos de archivos
 - Comando FORMAT
