@@ -1,2 +1,2 @@
 _DATA_BOOT:
-	;incbin "data/bootdisk.bin"
+	;incbin "data/bootdisk.flp"

@@ -1,7 +1,7 @@
-[org 0x7e00]
+[org 0x1000]
 
-BasicSpace equ 0xAA00
-ProgramSpace equ 0xDA00
+BasicSpace equ 0x7e00
+ProgramSpace equ 0xCe00
 GeneralSpace equ 0x10000
 BASCORE_SIZE equ 5
 
@@ -10,7 +10,7 @@ mov [_CurrentDisk], dl ; Set Disk
 call __GetDriveParameters
 
 mov di, 0x5000
-mov bx, word 0x18
+mov bx, word 0x23
 mov cl, BASCORE_SIZE
 .loadModule:
 	cmp cl, byte 0
@@ -34,9 +34,7 @@ mov al, [VideoMode]
 int 10h
 
 call ConsoleClear
-call CustomConsole ; Clear + TEMPLATE
-
-
+; AUTORUN
 
 
 MainLoop:
@@ -52,14 +50,24 @@ MainLoop:
 	
 	jmp MainLoop
 
-
-
 ; Si por algún motivo se pasa, detener
 cli
 hlt
 
+
+; System required variables
 BOOT_DRIVE:	db 0
 
+COLOR:
+	; See "COLOR ?"
+	db 0x0F
+SafeRect:
+	;  ROW  COL
+	db 0x00,0x00 ; Top-left corner
+	db 0x18,0x4f ; Bottom-right corner
+str_pretext:
+	times 6-($-str_pretext) db 0
+	db 0
 VideoMode:
 	; ==========================================================================
 	;                    Table of Video Modes (Only TEXT MODES)
@@ -75,9 +83,9 @@ VideoMode:
 	; ==========================================================================
 	db 0x03
 
-times 256-($-$$) db 0 ; offset hasta el 7d00
+times 256-($-$$) db 0 ; offset hasta el 0x1100
 
-; 0x7f00
+; 0x1100
 KIT: ; KIT, Kernel Interface Table
 	dw PrintString
 	dw PrintLn
@@ -92,20 +100,13 @@ KIT: ; KIT, Kernel Interface Table
 	dw BasicProgramCounter
 	dw MainLoop
 	
-	times 32-($-KIT) db 0
+	times 64-($-KIT) db 0
 	db 0x5a,0x7a ; KIT/MIT End Signature
 
 BasicProgramCounter: dw BasicSpace
 
 
-%include "templates/default.asm"
 %include "kernel/kernel.asm"
 %include "basic/mit.asm" ; Module Interface Table
 
-times 22*512-($-$$) db 0
-; ----------------------------------------
-; 22 sectores, reservados para el sistema, lo siguiente será el sistema de archivos en el disco, pero en la memoria el programa BASIC
-
-; 0xAA00 en memoria
-; Aqui va el BasicSpace en RAM
-; 22015 bytes hasta 0xFFFF
+times 32*512-($-$$) db 0

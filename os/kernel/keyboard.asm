@@ -150,9 +150,9 @@ GetChar:
 	
 	; Verificar
 	cmp al, 0x01 ; A
-	jl .noALT
+	jb .Aloop
 	cmp al, 0x1a ; Z
-	jg .noALT
+	ja .Aloop
 	
 	; Convertir
 	dec al ; ^A = NUL

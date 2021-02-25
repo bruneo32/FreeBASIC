@@ -6,7 +6,6 @@ BPB:
     jmp START
     nop
 	
-	; FAT12 for BRFS
 	db 'FreeBAS '				; OEM, 8 bytes
 	dw 512						; bytes per sector
 	db 1						; sectors per cluster
@@ -38,15 +37,15 @@ START:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Crear stack y demás cosas iniciales
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SYSTEM_SPACE equ 0x7e00
+SYSTEM_SPACE equ 0x1000
 xor ax, ax
 mov ds, ax
 mov es, ax
 mov fs, ax
 mov gs, ax
 
-mov bx, 0x5000 ; x7a00 = BRFS-TRS, 0x7800 = BRFS-TWS
-mov ebx, 0x00005000 ; For x86_64 machines
+mov bx, 0x0FFF
+mov ebx, 0x00000FFF ; For x86_64 machines
 cli
 mov ss, ax
 mov sp, bx
@@ -60,7 +59,7 @@ mov [BOOT_DRIVE], dl
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Leer segundo sector en SYSTEM_SPACE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SECTORS equ 0x16 ; Sectors to read. x16 = 22 dec (ver: main.asm ~final)
+SECTORS equ 0x20 ; Sectors to read. (ver: main.asm ~final)
 xor ax, ax ; Reset disk
 int 13h
 
@@ -131,9 +130,10 @@ db 0x55,0xaa
 
 ; ROOT
 ROOT:
-db 'hola.txt',0x1c,0x00,0x1d
-db 'FOLDER',0x1d,0x00,0x1e
-db 'appleii.tmp',0x1c,0x00,0x24
-db 'com64.tmp',0x1c,0x00,0x25
+db 'hola.txt',0x1c,0x00,0x27
+db 'FOLDER',0x1d,0x00,0x28
+db 'default.tmp',0x1c,0x00,0x30
+db 'appleii.tmp',0x1c,0x00,0x29
+db 'com64.tmp',0x1c,0x00,0x2a
 
 times 512-($-ROOT) db 0

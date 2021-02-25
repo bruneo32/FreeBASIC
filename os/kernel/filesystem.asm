@@ -10,8 +10,10 @@ _CD:
 	db 0x00,0x01 ; Root
 _FreeSector:
 	db 0x00,0x00
-_str_diskerror:
+_str_diskRerror:
 	db 'Disk Read Error',0
+_str_diskWerror:
+	db 'Disk Write Error',0
 
 ; FUNCTIONS
 _lba: db 0,0
@@ -20,7 +22,7 @@ _lba_H: db 0
 _lba_S: db 0
 _SectorsPerTrack: db 0
 _NumHeads: db 0
-_NumCillinders: db 0
+_NumCillinders: dw 0
 LBA2CHS:
 	; BX: Sector to read
 	
@@ -34,12 +36,10 @@ LBA2CHS:
 	mov [_lba+1], bl
 	
 	xor dx, dx
-	xor ax, ax
 	
 	;	S
 	mov ax, bx
 	mov bl, [_SectorsPerTrack]
-	xor dx, dx
 	div bl ; Remainder AH
 	inc ah
 	mov [_lba_S], ah
@@ -49,11 +49,9 @@ LBA2CHS:
 	mov bl, [_lba+1]
 	mov ax, bx
 	mov bl, [_SectorsPerTrack]
-	xor dx, dx
 	div bl ; Cociente: AL
 	xor ah, ah
 	mov bl, [_NumHeads]
-	xor dx, dx
 	div bl
 	
 	mov [_lba_C], ah ; Resto
@@ -71,10 +69,23 @@ __GetDriveParameters:
 	mov ah, 0x08
 	int 13h
 	jc .end
+	; Returns: 
+	; CH         Maximum value for cylinder (10-bit value;upper 2 bits in CL)
+	; CL         Maximum value for sector
+	; DH         Maximum value for heads
 	
-	mov [_NumCillinders], ch
-	mov [_SectorsPerTrack], cl
 	mov [_NumHeads], dh
+	
+	push cx
+	and cl, 00111111b
+	mov [_SectorsPerTrack], cl
+	pop cx
+	
+	and cl, 11000000b
+	shr cl, 6
+	ror cx, 8
+	mov [_NumCillinders],ch
+	mov [_NumCillinders+1],cl
 	
 	xor bx,bx
 	call _BRFS_ReadSector
@@ -140,7 +151,7 @@ _BRFS_ReadSector:
 	jmp .end
 	
 	.errorin:
-	call DiskError
+	call DiskReadError
 	stc
 	
 	.end:
@@ -151,14 +162,23 @@ _BRFS_ReadSectorCD:
 	mov bl, [_CD+1]
 	call _BRFS_ReadSector
 	ret
-DiskError:
+DiskReadError:
 	clc
 	xor ax, ax ; Reset
 	int 13h
-	mov si, _str_diskerror
+	mov si, _str_diskRerror
 	call PrintStringLn
 	
-	jmp word [0x7f16] ; Exit
+	jmp word [0x1116] ; Exit
+	ret
+DiskWriteError:
+	clc
+	xor ax, ax ; Reset
+	int 13h
+	mov si, _str_diskWerror
+	call PrintStringLn
+	
+	jmp word [0x1116] ; Exit
 	ret
 
 _BRFS_GetElementFromDir:
@@ -372,7 +392,7 @@ _BRFS_CreateEntry:
 	
 	.starti:
 	call _BRFS_ReadSectorCD
-	jc .error
+	jc .end
 	
 	mov di, word [._eind]
 	mov si, _BRFS_TRS_
@@ -451,15 +471,39 @@ _BRFS_CreateEntry:
 		mov al, 0x01 ; Count
 		mov ah, 0x03
 		int 13h
-		jc .error
+		jc DiskWriteError
 		
 		cmp al, 0x01
-		jnz .error
+		jnz DiskWriteError
 		ret
 	
-	.error:
-	call DiskError
-	stc
 	.end:
+	popa
+	ret
+
+_BRFS_WriteSector:
+	; BH,BL: Sector
+	pusha
+	; Adress in BH:BL
+	rol bx, 8
+	call LBA2CHS
+	
+	xor bx,bx
+	mov es, bx
+	mov bx, _BRFS_TWS_
+	
+	mov ch, [_lba_C] ; Cilindro.
+	mov dh, [_lba_H] ; Cabeza.
+	mov cl, [_lba_S] ; Sector
+	mov dl, [_CurrentDisk]
+	
+	mov al, 0x01 ; Count
+	mov ah, 0x03
+	int 13h
+	jc DiskWriteError
+	
+	cmp al, 0x01
+	jnz DiskWriteError
+	
 	popa
 	ret

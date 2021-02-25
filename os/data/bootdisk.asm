@@ -36,16 +36,3 @@ BRFS: ; -------------------------------------------------
 START:
 
 jmp $ ; HANG
-
-times 510-($-$$) db 0
-db 0x55,0xaa
-
-ROOT:
-db 'file',0x1c,0x00,0x05
-
-times 4*512-($-ROOT) db 0
-
-file:
-db '10 Printi'
-
-times 512-($-file) db 0

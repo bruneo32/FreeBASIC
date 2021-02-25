@@ -47,6 +47,7 @@ PrintStringLn:
 
 _ReflowCursor:
 	pusha
+	mov [_IntScroll], byte 0
 	
 	call GetCursorPos
 	mov dh, [_CursorRow]
@@ -62,14 +63,16 @@ _ReflowCursor:
 	cmp dl, byte [SafeRect+3] ; Check COL-RIGHT
 	jbe .next2
 	; Repos
-	inc dh
+	inc dh ; FIRES INTSCROLL
+	mov [_IntScroll], byte 1
 	mov dl, byte [SafeRect+1]
 	
 	.next2:
-	cmp dh, byte [SafeRect+2] ; Check COL-LEFT
+	cmp dh, byte [SafeRect+2] ; Check ROW-BOT
 	jbe .next3
 	; Repos
-	mov dh, byte [SafeRect+2]
+	mov dh, byte [SafeRect+2] ; FIRES INTSCROLL
+	mov [_IntScroll], byte 1
 	
 	push dx
 	mov ax, 0x0601 ; Clear screen
@@ -214,3 +217,4 @@ MovCursorRel:
 
 _CursorRow: db 0
 _CursorCol: db 0
+_IntScroll: db 0

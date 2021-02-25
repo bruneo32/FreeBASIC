@@ -5,7 +5,10 @@ str_cmds:
 	db '  > LIST, LOAD, NEW, RUN, SAVE',13
 	db 13
 	db ' Commands about system:',13
-	db '  > CDT, CLS, COLOR, HELP, MEM, OFF, PRE, PRG, PRT, RASM, SYS, TEMP, VER',13
+	db '  > CDT, CLS, COLOR, MEM, OFF, PRE, PRT',13
+	db '  > COM, PRG, SYS, RASM',13
+	db '  > ARECT, FRECT, SRECT',13
+	db '  > HELP, VER',13
 	db 13
 	db ' Commands about filesystem:',13
 	db '  > CAT, CD, DEL, DELD, MD, REN, REND, RTX, WTX',13
@@ -38,6 +41,277 @@ cmd_HELP:
 	call PrintLn
 	mov si, str_cmds
 	call PrintStringLn
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_ARECT:
+	db 'ARECT',0
+str_cmdh_ARECT:
+	db ' (?) Set the color attribute for a rectangle of the screen, keeping the characters inside. See COLOR.',13
+	db '     Max. ROW: 0x18. Max. COL: 0x4F. You can only use two-digit hexadecimal numbers (UPPERCASE).',13
+	db 13
+	db '     ARECT top,left,bottom,right,attribute',13
+	db '   Ex:',13
+	db '     > ARECT 00,00,18,4F,02',13
+	db '     > ARECT 03,05,15,49,33',0
+cmd_ARECT:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+6]
+	jnz .comm
+	mov si, str_cmdh_ARECT
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.comm:
+	
+	mov al, byte 0
+	call cmd_RECT_holder
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_FRECT:
+	db 'FRECT',0
+str_cmdh_FRECT:
+	db ' (?) Set the color attribute for a rectangle of the screen, keeping the characters inside. See ARECT.',13
+cmd_FRECT:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+6]
+	jnz .comm
+	mov si, str_cmdh_FRECT
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.comm:
+	
+	mov al, byte ' '
+	call cmd_RECT_holder
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+cmd_RECT_holder:
+	jmp .comm
+	
+	.a1:	db 0
+	.a2:	db 0
+	.a3:	db 0
+	.a4:	db 0
+	
+	.hc:	db 0
+	
+	.comm:
+	
+	mov byte [.hc], al
+	
+	;; CHECK FOR COMMAS
+	cmp byte [_InputBuffer+8], byte ','
+	jnz .cmdEndB
+	cmp byte [_InputBuffer+11], byte ','
+	jnz .cmdEndB
+	cmp byte [_InputBuffer+14], byte ','
+	jnz .cmdEndB
+	cmp byte [_InputBuffer+17], byte ','
+	jnz .cmdEndB
+	
+	;	Get 		1
+	mov bh, byte [_InputBuffer+6]
+	mov bl, byte [_InputBuffer+7]
+	;	Verify		1
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH1
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH1:
+	cmp bl, byte '9'
+	jbe .iBL1
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL1:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		1
+	shl bh, 4
+	or bh, bl
+	mov byte [.a1], bh
+	
+	;	Get 		2
+	mov bh, byte [_InputBuffer+9]
+	mov bl, byte [_InputBuffer+10]
+	;	Verify		2
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH2
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH2:
+	cmp bl, byte '9'
+	jbe .iBL2
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL2:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		2
+	shl bh, 4
+	or bh, bl
+	mov byte [.a2], bh
+	
+	;	Get 		3
+	mov bh, byte [_InputBuffer+12]
+	mov bl, byte [_InputBuffer+13]
+	;	Verify		3
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH3
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH3:
+	cmp bl, byte '9'
+	jbe .iBL3
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL3:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		3
+	shl bh, 4
+	or bh, bl
+	mov byte [.a3], bh
+	
+	;	Get 		4
+	mov bh, byte [_InputBuffer+15]
+	mov bl, byte [_InputBuffer+16]
+	;	Verify		4
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH4
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH4:
+	cmp bl, byte '9'
+	jbe .iBL4
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL4:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		4
+	shl bh, 4
+	or bh, bl
+	mov byte [.a4], bh
+	
+	;	Get 		5
+	mov bh, byte [_InputBuffer+18]
+	mov bl, byte [_InputBuffer+19]
+	;	Verify		5
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH5
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH5:
+	cmp bl, byte '9'
+	jbe .iBL5
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL5:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		5
+	shl bh, 4
+	or bh, bl
+	
+	mov ch, byte [.a1]
+	mov cl, byte [.a2]
+	mov dh, byte [.a3]
+	mov dl, byte [.a4]
+	mov al, byte [.hc]
+	call _AttrRect
+	; AL: Char (0 means same as previous).
+	; BH: New color
+	; CX: Top-Left
+	;  - CH: Row
+	;  - CL: Column
+	; DX: Right-Bottom
+	;  - DH: Row
+	;  - DL: Column
+	
 	
 	jmp .cmdEndG
 	.cmdEndB:
@@ -447,6 +721,148 @@ cmd_COLOR:
 	.cmdEnd:
 	ret
 
+str_cmd_COM:
+	db 'COM',0
+str_cmdh_COM:
+	db ' (?) Execute a command file (*.cmd, *.tmp, ...).',0
+cmd_COM:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_COM
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	; vars
+	._c:	dw 0
+	.resetinput:
+		call _ClearInputBuffer
+		mov di, _InputBuffer
+		ret
+		
+	.comm:
+	
+	mov bh, byte 0
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEnd
+	mov bh, 13 ; .cmd files
+	cmp bh, [_InputBuffer+4]
+	jz .cmdEnd
+	
+	cmp byte [__unreadable_disk], 0x00
+	jnz .unreadable
+	
+	call _BRFS_ReadSectorCD
+	jc .cmdEnd
+	
+	; Buscar si existe
+	mov bl, 0x1c ; Fichero
+	mov si, _InputBuffer+4
+	call _BRFS_GetElementFromDir
+	jc .cmdEndB ; No existe
+	; Adress in DX
+	mov [._c], dh
+	mov [._c+1], dl
+	
+	mov bh, dh
+	mov bl, dl
+	call _BRFS_ReadSector
+	jc .cmdEnd
+	
+	call .resetinput
+	.starti2:
+	mov si, _BRFS_TRS_
+	.loop:
+		cmp si, _BRFS_TRS_+510
+		jz .exitLoop
+		
+		; Ignorar hasta encontrar el siguiente
+		mov al, [si]
+		cmp al, 13 ; ENTER - CR
+		jz .exec
+		cmp al, 0 ; END
+		jz .exec
+		
+		; Verificar si cabe, si no: a chuparla
+		cmp di, _InputBuffer+_InputBufferSize
+		ja .next
+		
+		mov [di], al
+		inc di
+		
+		jmp .next
+		
+		.exec:
+		cmp byte [_InputBuffer], byte 0
+		jz .cmdEndG
+		
+		push si
+		call _con_exec
+		call .resetinput
+		pop si
+		
+		.next:
+		inc si
+		jmp .loop
+	.exitLoop:
+	; Verificar si hay más
+	
+	xor bh, bh
+	cmp bh, [si]
+	jnz .msg_leermas
+	cmp bh, [si+1]
+	jnz .msg_leermas
+	
+	jmp .cmdEndG
+	
+	
+	.msg_leermas:
+	push si
+	call __more
+	pop si
+	cmp bl, byte 0
+	jnz .cmdEndG
+	
+	xor bh, bh
+	cmp bh, [si]
+	jnz .leermas ; No es 0x0001
+	inc bh
+	cmp bh, [si+1]
+	jnz .leermas
+	
+	; Leermas1
+	mov bh, [._c]
+	mov bl, [._c+1]
+	inc bx
+	mov [._c], bh
+	mov [._c+1], bl
+	call _BRFS_ReadSector
+	jmp .starti2
+	
+	.leermas:
+	mov bh, [si]
+	mov bl, [si+1]
+	call _BRFS_ReadSector
+	jmp .starti2
+	
+	.unreadable:
+	mov si, _str_cc_unreadable
+	call PrintString
+	jmp .cmdEndG
+	.cmdEndB:
+	mov si, _str_cc_unkPath
+	call PrintString
+	.cmdEndG:
+	call PrintLn
+	xor bx, bx
+	.cmdEnd:
+	ret
+
 str_cmd_DSK:
 	db 'DSK',0
 str_cmdh_DSK:
@@ -574,9 +990,13 @@ cmd_DSKDAT:
 	add al, byte '0'
 	mov ah,0x0e
 	int 10h
-	call PrintLn
+	mov al, byte [_NumCillinders+1]
+	add al, byte '0'
+	mov ah,0x0e
+	int 10h
 	call PrintLn
 	
+	call PrintLn
 	mov si, .str_label
 	call PrintString
 	mov si, _CurrentLabel
@@ -639,7 +1059,7 @@ cmd_EMP:
 str_cmd_FORMAT:
 	db 'FORMAT',0
 str_cmdh_FORMAT:
-	db ' (?) Erase all the disk data of a disk, and format the disk as BRFS-32a.',0
+	db ' (?) Erase all the disk data of a disk, and format the disk as BRFS-16a.',0
 cmd_FORMAT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -657,6 +1077,20 @@ cmd_FORMAT:
 		db 'You cannot format the system disk. If you want to restore the default system, try reinstalling it on this disk.',0
 	.str_label:
 		db 'LABEL? ',0
+		
+	.miniwrite:
+		xor bx,bx
+		mov es,bx
+		mov bx, _BRFS_TRS_
+		xor ch,ch
+		xor dh,dh
+		; CH: Sector
+		; DL: Drive number
+		mov al, 0x01
+		mov ah, 0x03
+		int 13h
+		jc DiskWriteError
+		ret
 	
 	.comm:
 	
@@ -682,23 +1116,31 @@ cmd_FORMAT:
 	jmp .cmdEndG
 	
 	.ok:
-	push bx
+	mov dl, bl ; Drive number for FORMAT interrupt
 	call __ensure
 	cmp bl, byte 0
 	jnz .cmdEndB
 	
-	; xor bx,bx
-	; call _BRFS_ReadSector
+	push dx
 	
-	; pop dx
-	; xor bx,bx
-	; mov es,bx
-	; mov bx, _BRFS_TRS_
-	; xor cx,cx
-	; xor dh,dh
-	; mov al, 0x01
-	; mov ah, 0x03
-	; int 13h
+	call _BRFS_ClearTRS
+	
+	mov si, _DATA_BOOT
+	mov di, _BRFS_TRS_
+	mov bx, 512
+	call _mem_copy
+	
+	mov [_BRFS_TRS_+510], byte 0x55
+	mov [_BRFS_TRS_+511], byte 0xaa
+	
+	pop dx
+	mov cl, 0x00
+	call .miniwrite
+	
+	call _BRFS_ClearTRS
+	
+	mov cl, 0x01
+	call .miniwrite
 	
 	jmp .cmdEndG
 	.cmdEndB:
@@ -1530,7 +1972,7 @@ cmd_PRG:
 str_cmd_PRT:
 	db 'PRT',0
 str_cmdh_PRT:
-	db ' (?) Print a string.',0
+	db ' (?) Print a string literal. Faster than PRINT from BASIC.',0
 cmd_PRT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1717,6 +2159,184 @@ cmd_RUN:
 	.cmdEnd:
 	ret
 
+str_cmd_SRECT:
+	db 'SRECT',0
+str_cmdh_SRECT:
+	db ' (?) Set the SAVE RECT of the screen.',13
+	db '     Max. ROW: 0x18. Max. COL: 0x4F. You can only use two-digit hexadecimal numbers (UPPERCASE).',13
+	db 13
+	db '     SRECT top,left,bottom,right',13
+	db '   Ex:',13
+	db '     > SRECT 00,00,18,4F',13
+	db '     > SRECT 03,05,15,49',0
+cmd_SRECT:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+6]
+	jnz .comm
+	mov si, str_cmdh_SRECT
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.a1:	db 0
+	.a2:	db 0
+	.a3:	db 0
+	
+	.comm:
+	
+	;; CHECK FOR COMMAS
+	cmp byte [_InputBuffer+8], byte ','
+	jnz .cmdEndB
+	cmp byte [_InputBuffer+11], byte ','
+	jnz .cmdEndB
+	cmp byte [_InputBuffer+14], byte ','
+	jnz .cmdEndB
+	
+	;	Get 		1
+	mov bh, byte [_InputBuffer+6]
+	mov bl, byte [_InputBuffer+7]
+	;	Verify		1
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH1
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH1:
+	cmp bl, byte '9'
+	jbe .iBL1
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL1:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		1
+	shl bh, 4
+	or bh, bl
+	mov byte [.a1], bh
+	
+	;	Get 		2
+	mov bh, byte [_InputBuffer+9]
+	mov bl, byte [_InputBuffer+10]
+	;	Verify		2
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH2
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH2:
+	cmp bl, byte '9'
+	jbe .iBL2
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL2:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		2
+	shl bh, 4
+	or bh, bl
+	mov byte [.a2], bh
+	
+	;	Get 		3
+	mov bh, byte [_InputBuffer+12]
+	mov bl, byte [_InputBuffer+13]
+	;	Verify		3
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH3
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH3:
+	cmp bl, byte '9'
+	jbe .iBL3
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL3:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		3
+	shl bh, 4
+	or bh, bl
+	mov byte [.a3], bh
+	
+	;	Get 		4
+	mov bh, byte [_InputBuffer+15]
+	mov bl, byte [_InputBuffer+16]
+	;	Verify		4
+	cmp bh, byte '0'
+	jb .cmdEndB
+	cmp bl, byte '0'
+	jb .cmdEndB
+	cmp bh, byte 'Z'
+	ja .cmdEndB
+	cmp bl, byte 'Z'
+	ja .cmdEndB
+	cmp bh, byte '9'
+	jbe .iBH4
+	cmp bh, byte 'A'
+	jb .cmdEndB
+	sub bh, 0x07
+	.iBH4:
+	cmp bl, byte '9'
+	jbe .iBL4
+	cmp bl, byte 'A'
+	jb .cmdEndB
+	sub bl, 0x07
+	.iBL4:
+	sub bh, byte '0'
+	sub bl, byte '0'
+	;	Save		4
+	shl bh, 4
+	or bh, bl
+	
+	mov byte [SafeRect+3], bh
+	mov bh, byte [.a3]
+	mov byte [SafeRect+2], bh
+	mov bh, byte [.a2]
+	mov byte [SafeRect+1], bh
+	mov bh, byte [.a1]
+	mov byte [SafeRect], bh
+	
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
 str_cmd_SYS:
 	db 'SYS',0
 str_cmdh_SYS:
@@ -1839,7 +2459,6 @@ cmd_WTX:
 	mov di, word [_FreeSector]
 	call _BRFS_CreateEntry
 	
-	jmp .cmdEndG
 	
 	mov byte [._p], 0x00
 	.starti2:
@@ -1871,7 +2490,8 @@ cmd_WTX:
 		jnz .store
 		
 		; END WRITTING
-		; write TWS in disk
+		mov bx, word [_FreeSector]
+		call _BRFS_WriteSector
 		jmp .cmdEndG
 		
 		.spChar:
@@ -1913,7 +2533,8 @@ cmd_WTX:
 	mov byte [si+1], bl
 	
 	.ww:
-	; write TWS in disk
+	mov bx, word [_FreeSector]
+	call _BRFS_WriteSector
 	jmp .starti2
 	
 	.cmdEndB:
@@ -1953,10 +2574,15 @@ __more:
 	call GetCursorPos
 	mov dh, [_CursorRow]
 	mov dl, [_CursorCol]
-	;dec dh
-	push dx
 	
 	call PrintLn
+	cmp byte [_IntScroll], byte 0
+	jz .noscroll
+	mov [_IntScroll], byte 0
+	dec dh
+	.noscroll:
+	push dx
+	
 	mov si, _str__MORE
 	call PrintString
 	

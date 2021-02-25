@@ -109,6 +109,28 @@ _sys_get_date:
 	.end:
 	ret
 
+_mem_copy:
+	; SI: Source address
+	; DI: Destination address
+	; BX: Count
+	pusha
+	mov cx, bx
+	.loop:
+		cmp cx, byte 0
+		jz .exitLoop
+		
+		mov dh, [si]
+		mov byte [di], dh
+		
+		inc di
+		inc si
+		dec cx
+		jmp .loop
+	.exitLoop:
+	
+	popa
+	ret
+
 _sys_wait:
 	; MICROSEGUNDOS
 	; CX: HIGH
@@ -140,15 +162,18 @@ _sys_shutdown:
     int 0x15
 	;jc .end
 	
-	mov cx, 0x002d ; 3 SECONDS
-	mov dx, 0xc6c0
+	cli
+	hlt
+	
+	mov cx, 0x0001 ; 1.5 SECONDS
+	mov dx, 0x6b60
 	call _sys_wait
 	
 	; ACPI (if APM didnt work)
 	; ???
 	
-	mov cx, 0x002d ; 3 SECONDS
-	mov dx, 0xc6c0
+	mov cx, 0x0001 ; 1.5 SECONDS
+	mov dx, 0x6b60
 	call _sys_wait
 	
 	call PrintLn
@@ -157,7 +182,7 @@ _sys_shutdown:
 	call PrintStringLn
 	
 	.end:
-	jmp word [0x7f16] ; Exit
+	jmp word [0x1116] ; Exit
 
 ; DATOS
 _sys_time:

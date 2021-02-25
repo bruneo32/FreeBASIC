@@ -19,6 +19,14 @@ _con_exec:
 	jz .end
 	
 	
+	;	ARECT
+	mov si, _InputBuffer
+	mov di, str_cmd_ARECT
+	call iStringCompareSpace
+	call cmd_ARECT
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	CAT
 	mov si, _InputBuffer
 	mov di, str_cmd_CAT
@@ -59,6 +67,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	COM
+	mov si, _InputBuffer
+	mov di, str_cmd_COM
+	call iStringCompareSpace
+	call cmd_COM
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	DSK
 	mov si, _InputBuffer
 	mov di, str_cmd_DSK
@@ -72,6 +88,14 @@ _con_exec:
 	mov di, str_cmd_DSKDAT
 	call iStringCompareSpace
 	call cmd_DSKDAT
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
+	;	FRECT
+	mov si, _InputBuffer
+	mov di, str_cmd_FRECT
+	call iStringCompareSpace
+	call cmd_FRECT
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
@@ -187,6 +211,14 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
+	;	SRECT
+	mov si, _InputBuffer
+	mov di, str_cmd_SRECT
+	call iStringCompareSpace
+	call cmd_SRECT
+	cmp bh, byte 0 ; Rutina
+	jz .end
+	
 	;	SYS
 	mov si, _InputBuffer
 	mov di, str_cmd_SYS
@@ -231,8 +263,8 @@ _bas_store:
 	mov di, word [BasicProgramCounter]
 	.loop:
 		; Limitar
-		mov bx, 0xffff
-		cmp di, bx ; 0x9e00 + 12KB
+		mov bx, ProgramSpace
+		cmp di, bx
 		jae .error
 		
 		
@@ -252,7 +284,7 @@ _bas_store:
 	
 	.storeCR:
 		; Ojete con pasarse del Buffer
-		mov bx, 0xce00
+		mov bx, ProgramSpace
 		cmp di, bx ; 0x9e00 + 12KB
 		jae .error
 		
@@ -288,7 +320,7 @@ TryCommandOrBas:
 		; Si encuentra un NUL o un SPACE
 		mov bx, 0x0020 ; BH:NUL | BL:SPACE (20h)
 		cmp [si], bh ; [SI]==00, fin del string siendo solo un numero, entonces tenemos que borrar esa linea.
-		jz .end
+		jz .bas
 		cmp [si], bl ; [SI]==SPACE, asi que todo bien, vamos a ejecutar el BASIC
 		jz .bas
 		
