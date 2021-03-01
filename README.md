@@ -46,10 +46,10 @@ Total space        /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \
                   =                                                 =
                   =                                                 =
   0x1FFFE         =================================================== <--  Maximum accessible with FreeBASIC extended addresing.
-                  = General purpose space                           =
+                  = Extended space: General purpose                 =
                   =                                                 =
-                  = Used by the interpreter, *.prg programs and     =
-                  = similar stuff.                                  =
+                  =                                                 =
+                  =                                                 =
                   =                                                 =
                   =                                                 =
                   =                                                 =
