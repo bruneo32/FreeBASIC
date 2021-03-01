@@ -4,7 +4,6 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
-- autorun.cmd
 - Problema X
 - MORE para HELP?
 - Comandos de archivos
@@ -13,6 +12,7 @@
 - BRFS de 32 bits
 
 # Done
+- autorun.cmd
 - TEMPLATES
 - Borrar linea en BASIC
 - Arreglar GetElementFromDir
