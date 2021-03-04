@@ -5,10 +5,10 @@ str_cmds:
 	db '  > LIST, LOAD, NEW, RUN, SAVE',13
 	db 13
 	db ' Commands about system:',13
-	db '  > CDT, CLS, COLOR, MEM, OFF, PRE, PRT',13
-	db '  > COM, PRG, SYS, RASM',13
-	db '  > ARECT, FRECT, SRECT',13
-	db '  > HELP, VER',13
+	db '  > CDT, CLS, COLOR, COM, HELP, OFF, PRE, PRG',13
+	db 13
+	db ' Commands about system (advanced):',13
+	db '  > ARECT, FRECT, MEM, PRT, SRECT, SYS, RASM, REM, VER',13
 	db 13
 	db ' Commands about filesystem:',13
 	db '  > CAT, CD, DEL, DELD, MD, REN, REND, RTX, WTX',13
@@ -20,12 +20,12 @@ str_cmds:
 	db '  > DSK, DSKDAT, FORMAT, LD'
 	
 	db 0
-	
+
 str_cmd_HELP:
 	db 'HELP',0
 cmd_HELP:
 	; Verificacion rutinaria
-	cmp bh, byte 0 ; Si el comando introducido no era OFF, terminar
+	cmp bh, byte 0 ; Si el comando introducido no era HELP, terminar
 	jnz .cmdEnd
 	
 	mov bh, byte '?'
@@ -485,7 +485,7 @@ cmd_CAT:
 str_cmd_CD:
 	db 'CD',0
 str_cmdh_CD:
-	db ' (?) Change the current system path [Case sensitive]. See: CAT.',0
+	db ' (?) Change the current system path to a directory [Case sensitive]. See: CAT.',0
 cmd_CD:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -642,7 +642,7 @@ str_cmdh_COLOR:
 	db '  > First digit  : Background color',13
 	db '  > Second digit : Foreground color',13
 	db '  Example:  COLOR 1F, produces bright white foreground over a blue background.',13
-	db '  *Note: The background has 8 colors and the foreground 16 (F); if you try a background color above 7, it results on a blinking text.'
+	db '  *Note: The background has 8 colors and the foreground 16 (0xF). If you try  to set a background color above 7, it results on a blinking text.'
 	db 0
 cmd_COLOR:
 	; Verificacion rutinaria
@@ -799,7 +799,7 @@ cmd_COM:
 		
 		.exec:
 		cmp byte [_InputBuffer], byte 0
-		jz .cmdEndG
+		jz .exitLoop
 		
 		push si
 		call _con_exec
@@ -811,7 +811,7 @@ cmd_COM:
 		jmp .loop
 	.exitLoop:
 	; Verificar si hay más
-	
+	mov si, _BRFS_TRS_+510
 	xor bh, bh
 	cmp bh, [si]
 	jnz .msg_leermas
@@ -822,12 +822,6 @@ cmd_COM:
 	
 	
 	.msg_leermas:
-	push si
-	call __more
-	pop si
-	cmp bl, byte 0
-	jnz .cmdEndG
-	
 	xor bh, bh
 	cmp bh, [si]
 	jnz .leermas ; No es 0x0001
@@ -959,8 +953,7 @@ cmd_DSKDAT:
 	mov al, byte [_CurrentDisk]
 	cmp al, byte 0x80
 	jb .si
-	sub al, byte 63
-	jmp .prr
+	sub al, byte 111
 	.si:
 	add al, byte '0'
 	.prr:
@@ -1019,38 +1012,6 @@ cmd_DSKDAT:
 	call MovCursorRel
 	mov si, _str_cc_unreadable
 	call PrintStringLn
-	.cmdEndG:
-	xor bx, bx
-	.cmdEnd:
-	ret
-
-str_cmd_EMP:
-	db 'EMP',0
-str_cmdh_EMP:
-	db ' (?) Does literally nothing. xD',0
-cmd_EMP:
-	; Verificacion rutinaria
-	cmp bh, byte 0
-	jnz .cmdEnd
-	
-	mov bh, byte '?'
-	cmp bh, [_InputBuffer+4]
-	jnz .comm
-	mov si, str_cmdh_EMP
-	call PrintStringLn
-	xor bx, bx
-	ret
-	
-	.comm:
-	
-	
-	; ABSOLUTAMENTE NADA XD
-	
-	
-	jmp .cmdEndG
-	.cmdEndB:
-	mov bh, byte 1
-	ret
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -1396,6 +1357,10 @@ cmd_LD:
 	mov si, .str_blist
 	call PrintString
 	mov al, byte [BOOT_DRIVE]
+	cmp al, byte 0x80
+	jb .number
+	sub al, byte 111
+	.number:
 	add al, byte '0'
 	mov ah, 0x0e
 	int 10h
@@ -1633,10 +1598,10 @@ cmd_MEM:
 	.str2:
 		db '   Accessibles by the system             :  0x80 =0x40+0x40 [-2 bytes]',13
 		db 13
-		db '   Lower memory size   (0000 - 7E00)     :  0x20',13
-		db '   System size         (7E00 - AA00)     :  0x0B',13
-		db '   BASIC program space (AA00 - DA00)     :  0x0C',13
-		db '   Programs Space      (DA00 - 10000)    :  0x09',13
+		db '   Lower memory size   (0000 - 1000)     :  0x04',13
+		db '   System size         (1000 - 7C00)     :  0x1B',13
+		db '   BASIC program space (7E00 - CE00)     :  0x14',13
+		db '   Programs Space      (CE00 - 10000)    :  0x0C',13
 		db '   Extended Space      (10000 - 1FFFF)   :  0x40 [-2 bytes]',0
 	
 	
@@ -1871,7 +1836,7 @@ cmd_PRE:
 str_cmd_PRG:
 	db 'PRG',0
 str_cmdh_PRG:
-	db ' (?) Load a compiled program file (*.prg) into 0xDA00, and the execute it.',0
+	db ' (?) Load a compiled program file (*.prg) into 0xCE00, and the execute it.',0
 cmd_PRG:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1990,6 +1955,38 @@ cmd_PRT:
 	
 	mov si, _InputBuffer+4
 	call PrintStringLn
+	
+	
+	jmp .cmdEndG
+	.cmdEndB:
+	mov bh, byte 1
+	ret
+	.cmdEndG:
+	xor bx, bx
+	.cmdEnd:
+	ret
+
+str_cmd_REM:
+	db 'REM',0
+str_cmdh_REM:
+	db ' (?) Works as a comment for command files.',0
+cmd_REM:
+	; Verificacion rutinaria
+	cmp bh, byte 0
+	jnz .cmdEnd
+	
+	mov bh, byte '?'
+	cmp bh, [_InputBuffer+4]
+	jnz .comm
+	mov si, str_cmdh_REM
+	call PrintStringLn
+	xor bx, bx
+	ret
+	
+	.comm:
+	
+	
+	; Blank command
 	
 	
 	jmp .cmdEndG

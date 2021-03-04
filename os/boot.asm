@@ -44,12 +44,14 @@ mov es, ax
 mov fs, ax
 mov gs, ax
 
-mov bx, 0x0FFF
-mov ebx, 0x00000FFF ; For x86_64 machines
+mov bx, 0x1000
+mov ebx, 0x00001000 ; x86-64 machines won't work just with SP, they need ESP
 cli
 mov ss, ax
-mov sp, bx
-mov esp, ebx ; For x86_64 machines
+mov bp, bx
+mov ebp, ebx ; For x86-64 machines
+mov sp, bx-1
+mov esp, ebx-1 ; For x86-64 machines
 sti
 
 mov [BOOT_DRIVE], dl
@@ -130,10 +132,11 @@ db 0x55,0xaa
 
 ; ROOT
 ROOT:
+db 'autorun.cmd',0x1c,0x00,0x31
 db 'hola.txt',0x1c,0x00,0x27
 db 'FOLDER',0x1d,0x00,0x28
 db 'default.tmp',0x1c,0x00,0x30
 db 'appleii.tmp',0x1c,0x00,0x29
-db 'com64.tmp',0x1c,0x00,0x2a
+db 'C64.tmp',0x1c,0x00,0x2a
 
 times 512-($-ROOT) db 0

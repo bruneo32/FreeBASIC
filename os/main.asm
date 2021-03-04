@@ -1,7 +1,7 @@
 [org 0x1000]
 
 BasicSpace equ 0x7e00
-ProgramSpace equ 0xCe00
+ProgramSpace equ 0xce00
 GeneralSpace equ 0x10000
 BASCORE_SIZE equ 5
 
@@ -9,8 +9,17 @@ mov [BOOT_DRIVE], dl
 mov [_CurrentDisk], dl ; Set Disk
 call __GetDriveParameters
 
+mov byte [BasicSpace], byte 0
+
+xor ah, ah ; Set video mode
+mov al, [VideoMode]
+int 10h
+
+call ConsoleClear
+
+
 mov di, 0x5000
-mov bx, word 0x23
+mov bx, word 0x22
 mov cl, BASCORE_SIZE
 .loadModule:
 	cmp cl, byte 0
@@ -27,15 +36,33 @@ mov cl, BASCORE_SIZE
 	jmp .loadModule
 .exitLoadmodule:
 
-mov byte [BasicSpace], byte 0
+;;;;;;;;;;; AUTORUN ;;;;;;;;;;;
+call _BRFS_ReadSectorCD
+jc MainLoop
 
-xor ah, ah ; Set video mode
-mov al, [VideoMode]
-int 10h
+; Buscar si existe
+mov bl, 0x1c ; Fichero
+mov si, str_com_autorun+4 ; "autorun.cmd"
+call _BRFS_GetElementFromDir
+jc MainLoop ; No existe
 
-call ConsoleClear
-; AUTORUN
+call _ClearInputBuffer
+mov di, _InputBuffer
+mov si, str_com_autorun
+._autorunLoop:
+	cmp byte [si], byte 0
+	jz ._exitAutorunLoop
+	
+	mov bl, byte [si]
+	mov byte [di], bl
+	
+	inc si
+	inc di
+	jmp ._autorunLoop
+._exitAutorunLoop:
 
+call _con_exec
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MainLoop:
 	call PrintLn
@@ -54,13 +81,15 @@ MainLoop:
 cli
 hlt
 
+str_com_autorun:
+	db 'COM autorun.cmd',0
 
 ; System required variables
 BOOT_DRIVE:	db 0
 
 COLOR:
 	; See "COLOR ?"
-	db 0x0F
+	db 0x1F
 SafeRect:
 	;  ROW  COL
 	db 0x00,0x00 ; Top-left corner
@@ -104,7 +133,6 @@ KIT: ; KIT, Kernel Interface Table
 	db 0x5a,0x7a ; KIT/MIT End Signature
 
 BasicProgramCounter: dw BasicSpace
-
 
 %include "kernel/kernel.asm"
 %include "basic/mit.asm" ; Module Interface Table

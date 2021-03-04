@@ -16,7 +16,7 @@ ConsoleClear:
 	; This is for commands in FreeBASIC
 	call _con_clear
 	
-	call _FillColor
+	;call _FillColor
 	
 	mov dh, byte [SafeRect]
 	mov dl, byte [SafeRect+1]

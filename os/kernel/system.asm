@@ -160,22 +160,32 @@ _sys_shutdown:
     mov bx, 0x0001
     mov cx, 0x0003
     int 0x15
-	;jc .end
+	jc .error
 	
-	cli
-	hlt
-	
-	mov cx, 0x0001 ; 1.5 SECONDS
-	mov dx, 0x6b60
-	call _sys_wait
+	mov cx, 0x2200
+	call Sleep
 	
 	; ACPI (if APM didnt work)
-	; ???
 	
-	mov cx, 0x0001 ; 1.5 SECONDS
-	mov dx, 0x6b60
-	call _sys_wait
+	.shutdown_sucess:
+	mov ax, 5301h           		 ; Connect to the APM
+	xor bx, bx
+	int 15h
+	je .continue_connection     	 ; Pass if connected
+	cmp ah, 2
+	je .continue_connection      	 ; Pass if already connected
+	jmp .error
 	
+	.continue_connection:
+	mov ax, 530Eh            		 ; Check APM Version
+	xor bx, bx
+	mov cx, 0102h           		 ; v1.2 Required
+	int 15h
+	jc .error
+	
+	jmp .end
+	
+	.error:
 	call PrintLn
 	call PrintLn
 	mov si, _sys_offnt

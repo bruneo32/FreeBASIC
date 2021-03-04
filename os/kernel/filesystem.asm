@@ -45,11 +45,11 @@ LBA2CHS:
 	mov [_lba_S], ah
 	
 	;	C
-	mov bh, [_lba]
-	mov bl, [_lba+1]
-	mov ax, bx
-	mov bl, [_SectorsPerTrack]
-	div bl ; Cociente: AL
+	; mov bh, [_lba]
+	; mov bl, [_lba+1]
+	; mov ax, bx
+	; mov bl, [_SectorsPerTrack]
+	; div bl ; Cociente: AL
 	xor ah, ah
 	mov bl, [_NumHeads]
 	div bl
