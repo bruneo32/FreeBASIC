@@ -1,0 +1,3 @@
+main.c:6:6:sortProgram	666	dynamic,bounded
+main.c:124:6:list	342	dynamic,bounded
+main.c:188:6:interpret	6	dynamic,bounded
