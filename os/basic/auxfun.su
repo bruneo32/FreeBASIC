@@ -1,0 +1,7 @@
+auxfun.c:9:7:memcpy	8	static
+auxfun.c:16:6:strncpy	8	static
+auxfun.c:22:13:strchr	6	static
+auxfun.c:32:8:strspn	12	static
+auxfun.c:50:8:strlen	6	static
+auxfun.c:56:5:atoin	8	static
+auxfun.c:63:13:strpbrk	8	static
