@@ -65,7 +65,6 @@ call _con_exec
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MainLoop:
-	call PrintLn
 	mov si, str_pretext
 	call PrintString
 	
@@ -82,7 +81,7 @@ cli
 hlt
 
 str_com_autorun:
-	db 'COM autorun.cmd',0
+	db 'CMD autorun.cmd',0
 
 ; System required variables
 BOOT_DRIVE:	db 0

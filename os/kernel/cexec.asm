@@ -67,11 +67,11 @@ _con_exec:
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
-	;	COM
+	;	CMD
 	mov si, _InputBuffer
-	mov di, str_cmd_COM
+	mov di, str_cmd_CMD
 	call iStringCompareSpace
-	call cmd_COM
+	call cmd_CMD
 	cmp bh, byte 0 ; Rutina
 	jz .end
 	
@@ -358,7 +358,7 @@ TryCommandOrBas:
 	ret
 
 _str_basicoverflow:
-	db '[ERROR] BASIC program overflow, you exceded 12KB and reached 0xDA00.',0
+	db '[ERROR] BASIC program overflow, you exceded 32KB and reached 0xCE00.',13,0
 
 _str_nocom:
-	db '[Error] Unknown or invalid command.',0
+	db '[Error] Unknown or invalid command.',13,0

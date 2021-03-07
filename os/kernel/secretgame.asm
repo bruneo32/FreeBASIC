@@ -1,4 +1,4 @@
-__SecretSleep__ equ 150
+__SecretSleep__ equ 60
 __SECRETGAME__:
 	
 	mov bx, word 1

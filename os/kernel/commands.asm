@@ -5,7 +5,7 @@ str_cmds:
 	db '  > LIST, LOAD, NEW, RUN, SAVE',13
 	db 13
 	db ' Commands about system:',13
-	db '  > CDT, CLS, COLOR, COM, HELP, OFF, PRE, PRG',13
+	db '  > CDT, CLS, CMD, COLOR, HELP, OFF, PRE, PRG',13
 	db 13
 	db ' Commands about system (advanced):',13
 	db '  > ARECT, FRECT, MEM, PRT, SRECT, SYS, RASM, REM, VER',13
@@ -17,7 +17,7 @@ str_cmds:
 	db '  > COPY, COPYD, INF, INFD, MOV, MOVD, STR, STRD',13
 	db 13
 	db ' Commands about disks:',13
-	db '  > DSK, DSKDAT, FORMAT, LD'
+	db '  > DSK, DSKDAT, FORMAT, LD',13
 	
 	db 0
 
@@ -60,7 +60,7 @@ str_cmdh_ARECT:
 	db '     ARECT top,left,bottom,right,attribute',13
 	db '   Ex:',13
 	db '     > ARECT 00,00,18,4F,02',13
-	db '     > ARECT 03,05,15,49,33',0
+	db '     > ARECT 03,05,15,49,33',13,0
 cmd_ARECT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -91,7 +91,7 @@ cmd_ARECT:
 str_cmd_FRECT:
 	db 'FRECT',0
 str_cmdh_FRECT:
-	db ' (?) Set the color attribute for a rectangle of the screen, keeping the characters inside. See ARECT.',13
+	db ' (?) Set the color attribute for a rectangle of the screen, keeping the characters inside. See ARECT.',13,0
 cmd_FRECT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -325,7 +325,7 @@ cmd_RECT_holder:
 str_cmd_CAT:
 	db 'CAT',0
 str_cmdh_CAT:
-	db ' (?) Watch a list with all the items in the current directory.',0
+	db ' (?) Watch a list with all the items in the current directory.',13,0
 cmd_CAT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -357,14 +357,12 @@ cmd_CAT:
 	mov bx, 0x0001
 	call MovCursorRel
 	
-	mov ah,0x0e
 	mov al, byte '['
-	int 10h
+	call PrintChar
 	mov si, _CurrentLabel
 	call PrintString
-	mov ah,0x0e
 	mov al, byte ']'
-	int 10h
+	call PrintChar
 	
 	call PrintLn
 	call PrintLn
@@ -440,16 +438,12 @@ cmd_CAT:
 		cmp bl, bh
 		jae .next
 		
-		mov ah, 0x0e
 		mov al, '|'
-		xor bx, bx
-		int 10h
+		call PrintChar
 		jmp .next
 		
 		.esc2:
-		mov ah, 0x0e
-		xor bx, bx ; PAGE
-		int 10h
+		call PrintChar
 		
 		.next:
 		inc si
@@ -462,6 +456,7 @@ cmd_CAT:
 	cmp bh, [si+1]
 	jnz .leermas
 	
+	call PrintLn
 	jmp .cmdEndG
 	
 	.leermas:
@@ -485,7 +480,7 @@ cmd_CAT:
 str_cmd_CD:
 	db 'CD',0
 str_cmdh_CD:
-	db ' (?) Change the current system path to a directory [Case sensitive]. See: CAT.',0
+	db ' (?) Change the current system path to a directory [Case sensitive]. See: CAT.',13,0
 cmd_CD:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -524,8 +519,6 @@ cmd_CD:
 	mov [_CD+1], dl
 	
 	jmp .cmdEndG
-	
-	jmp .cmdEndG
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintStringLn
@@ -550,7 +543,7 @@ str_cmdh_CDT:
 	db ' > Month   : 02 (February)',13
 	db ' > Day     : 16',13
 	db ' ',175,' Hours   : 11',13
-	db ' ',175,' Minutes : 15'
+	db ' ',175,' Minutes : 15',13
 	db 0
 cmd_CDT:
 	; Verificacion rutinaria
@@ -581,8 +574,7 @@ cmd_CDT:
 	
 	call _sys_get_time
 	mov si, _sys_time
-	call PrintString
-	
+	call PrintStringLn
 	
 	call PrintLn
 	
@@ -598,7 +590,7 @@ cmd_CDT:
 str_cmd_CLS:
 	db 'CLS',0
 str_cmdh_CLS:
-	db ' (?) Clear the screen rect.',0
+	db ' (?) Clear the screen rect.',13,0
 cmd_CLS:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -642,7 +634,7 @@ str_cmdh_COLOR:
 	db '  > First digit  : Background color',13
 	db '  > Second digit : Foreground color',13
 	db '  Example:  COLOR 1F, produces bright white foreground over a blue background.',13
-	db '  *Note: The background has 8 colors and the foreground 16 (0xF). If you try  to set a background color above 7, it results on a blinking text.'
+	db '  *Note: The background has 8 colors and the foreground 16 (0xF). If you try  to set a background color above 7, it results on a blinking text.',13
 	db 0
 cmd_COLOR:
 	; Verificacion rutinaria
@@ -721,11 +713,11 @@ cmd_COLOR:
 	.cmdEnd:
 	ret
 
-str_cmd_COM:
-	db 'COM',0
-str_cmdh_COM:
-	db ' (?) Execute a command file (*.cmd, *.tmp, ...).',0
-cmd_COM:
+str_cmd_CMD:
+	db 'CMD',0
+str_cmdh_CMD:
+	db ' (?) Execute a command file (*.cmd, *.tmp, ...).',13,0
+cmd_CMD:
 	; Verificacion rutinaria
 	cmp bh, byte 0
 	jnz .cmdEnd
@@ -733,7 +725,7 @@ cmd_COM:
 	mov bh, byte '?'
 	cmp bh, [_InputBuffer+4]
 	jnz .comm
-	mov si, str_cmdh_COM
+	mov si, str_cmdh_CMD
 	call PrintStringLn
 	xor bx, bx
 	ret
@@ -798,9 +790,6 @@ cmd_COM:
 		jmp .next
 		
 		.exec:
-		cmp byte [_InputBuffer], byte 0
-		jz .exitLoop
-		
 		push si
 		call _con_exec
 		call .resetinput
@@ -846,11 +835,11 @@ cmd_COM:
 	
 	.unreadable:
 	mov si, _str_cc_unreadable
-	call PrintString
+	call PrintStringLn
 	jmp .cmdEndG
 	.cmdEndB:
 	mov si, _str_cc_unkPath
-	call PrintString
+	call PrintStringLn
 	.cmdEndG:
 	call PrintLn
 	xor bx, bx
@@ -861,7 +850,7 @@ str_cmd_DSK:
 	db 'DSK',0
 str_cmdh_DSK:
 	db ' (?) Jump to the root directory of the disk specified. Example: DSK 0, DSK 1, DSK 2, ...',13
-	db '     Use "DSK ." to jmp to the system disk.',0
+	db '     Use "DSK ." to jmp to the system disk.',13,0
 cmd_DSK:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -913,7 +902,7 @@ cmd_DSK:
 str_cmd_DSKDAT:
 	db 'DSKDAT',0
 str_cmdh_DSKDAT:
-	db ' (?) Watch information about the current disk.',0
+	db ' (?) Watch information about the current disk.',13,0
 cmd_DSKDAT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -941,7 +930,7 @@ cmd_DSKDAT:
 		db '  BRFS Subformat          : BRFS-16a',13
 		db '   > Index labeling       : ASCII',13
 		db '   > Pointer size         : 16 bit',13
-		db '   > Attribute size       : $0'
+		db '   > Attribute size       : $0',13
 		db 0
 
 	.comm:
@@ -957,36 +946,31 @@ cmd_DSKDAT:
 	.si:
 	add al, byte '0'
 	.prr:
-	mov ah,0x0e
-	int 10h
+	call PrintChar
 	call PrintLn
 	
 	mov si, .str_SectorsPerTrack
 	call PrintString
 	mov al, byte [_SectorsPerTrack]
 	add al, byte '0'
-	mov ah,0x0e
-	int 10h
+	call PrintChar
 	call PrintLn
 	
 	mov si, .str_NumHeads
 	call PrintString
 	mov al, byte [_NumHeads]
 	add al, byte '0'
-	mov ah,0x0e
-	int 10h
+	call PrintChar
 	call PrintLn
 	
 	mov si, .str_NumCillinders
 	call PrintString
 	mov al, byte [_NumCillinders]
 	add al, byte '0'
-	mov ah,0x0e
-	int 10h
+	call PrintChar
 	mov al, byte [_NumCillinders+1]
 	add al, byte '0'
-	mov ah,0x0e
-	int 10h
+	call PrintChar
 	call PrintLn
 	
 	call PrintLn
@@ -1020,7 +1004,7 @@ cmd_DSKDAT:
 str_cmd_FORMAT:
 	db 'FORMAT',0
 str_cmdh_FORMAT:
-	db ' (?) Erase all the disk data of a disk, and format the disk as BRFS-16a.',0
+	db ' (?) Erase all the disk data of a disk, and format the disk as BRFS-16a.',13,0
 cmd_FORMAT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1115,7 +1099,7 @@ cmd_FORMAT:
 str_cmd_INF:
 	db 'INF',0
 str_cmdh_INF:
-	db ' (?) Watch information about a file. Use INFD for directories.',0
+	db ' (?) Watch information about a file. Use INFD for directories.',13,0
 cmd_INF:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1145,7 +1129,7 @@ cmd_INF:
 str_cmd_INFD:
 	db 'INFD',0
 str_cmdh_INFD:
-	db ' (?) Watch information about a directory. Use INF for files.',0
+	db ' (?) Watch information about a directory. Use INF for files.',13,0
 cmd_INFD:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1313,6 +1297,7 @@ cmd_INF_holder:
 	mov si, .lbahex
 	call PrintStringLn
 	
+	call PrintLn
 	jmp .cmdEndG
 	
 	.unreadable:
@@ -1330,7 +1315,7 @@ cmd_INF_holder:
 str_cmd_LD:
 	db 'LD',0
 str_cmdh_LD:
-	db ' (?) Watch the number of disks accessibles by the system. Use DSK to change the current disk.',0
+	db ' (?) Watch the number of disks accessibles by the system. Use DSK to change the current disk.',13,0
 cmd_LD:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1362,8 +1347,7 @@ cmd_LD:
 	sub al, byte 111
 	.number:
 	add al, byte '0'
-	mov ah, 0x0e
-	int 10h
+	call PrintChar
 	
 	call PrintLn
 	
@@ -1409,8 +1393,7 @@ cmd_LD:
 		.floppy:
 		add al, byte '0'
 		.prr:
-		mov ah, 0x0e
-		int 10h
+		call PrintChar
 		
 		.next:
 		pop ax
@@ -1418,6 +1401,7 @@ cmd_LD:
 		jmp .cdsk
 	.exitCdsk:
 	
+	call PrintLn
 	call PrintLn
 	
 	jmp .cmdEndG
@@ -1438,7 +1422,7 @@ str_cmdh_LIST:
 	db '   > LIST 10',13
 	db '   > LIST 20-50',13
 	db '   > LIST -31',13
-	db '   > LIST 80-'
+	db '   > LIST 80-',13
 	db 0
 cmd_LIST:
 	; Verificacion rutinaria
@@ -1458,6 +1442,8 @@ cmd_LIST:
 	mov si, _InputBuffer+5
 	call MIT_LIST
 	
+	call PrintLn
+	
 	jmp .cmdEndG
 	.cmdEndB:
 	mov bh, byte 1
@@ -1470,7 +1456,7 @@ cmd_LIST:
 str_cmd_LOAD:
 	db 'LOAD',0
 str_cmdh_LOAD:
-	db ' (?) Load a BASIC program, overwritting the current program.',0
+	db ' (?) Load a BASIC program, overwritting the current program.',13,0
 cmd_LOAD:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1539,6 +1525,7 @@ cmd_LOAD:
 	cmp bh, [si+1]
 	jnz .msg_leermas
 	
+	call PrintLn
 	jmp .cmdEndG
 	
 	
@@ -1567,7 +1554,7 @@ cmd_LOAD:
 	
 	.cmdEndB:
 	mov si, _str_cc_unkPath
-	call PrintString
+	call PrintStringLn
 	.cmdEndG:
 	xor bx, bx
 	.cmdEnd:
@@ -1576,7 +1563,7 @@ cmd_LOAD:
 str_cmd_MEM:
 	db 'MEM',0
 str_cmdh_MEM:
-	db ' (?) Reports the number of contiguous 1K memory blocks in the system (up to 640K).',0
+	db ' (?) Reports the number of contiguous 1K memory blocks in the system (up to 640K).',13,0
 cmd_MEM:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1602,7 +1589,7 @@ cmd_MEM:
 		db '   System size         (1000 - 7C00)     :  0x1B',13
 		db '   BASIC program space (7E00 - CE00)     :  0x14',13
 		db '   Programs Space      (CE00 - 10000)    :  0x0C',13
-		db '   Extended Space      (10000 - 1FFFF)   :  0x40 [-2 bytes]',0
+		db '   Extended Space      (10000 - 1FFFF)   :  0x40 [-2 bytes]',13,0
 	
 	
 	.comm:
@@ -1666,7 +1653,7 @@ cmd_MEM:
 str_cmd_NEW:
 	db 'NEW',0
 str_cmdh_NEW:
-	db ' (?) Clear the program in memory. Use "NEW +" to avoid prompting.',0
+	db ' (?) Clear the program in memory. Use "NEW +" to avoid prompting.',13,0
 cmd_NEW:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1723,7 +1710,7 @@ str_cmd_OFF:
 	db 'OFF',0
 str_cmdh_OFF:
 	db ' (?) Turns off the computer. Use "OFF +" to avoid prompting.',13
-	db '     Type "OFF %" to reboot the system. Depending on your BIOS, you may have to perform some actions to reboot.'
+	db '     Type "OFF %" to reboot the system. Depending on your BIOS, you may have to perform some actions to reboot.',13
 	db 0
 cmd_OFF:
 	; Verificacion rutinaria
@@ -1755,6 +1742,7 @@ cmd_OFF:
 	int 19h
 	
 	.offi:
+	call PrintLn
 	mov si, _str_cc_OFF
 	call PrintStringLn
 	
@@ -1785,6 +1773,7 @@ cmd_OFF:
 	mov bh, byte 1
 	ret
 	.cmdEndG:
+	call PrintLn
 	xor bx, bx
 	.cmdEnd:
 	ret
@@ -1792,7 +1781,7 @@ cmd_OFF:
 str_cmd_PRE:
 	db 'PRE',0
 str_cmdh_PRE:
-	db ' (?) Change the prefix of the command line (default: "# "). Maximum 6 characters.',0
+	db ' (?) Change the prefix of the command line (default: "# "). Maximum 6 characters.',13,0
 cmd_PRE:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1836,7 +1825,7 @@ cmd_PRE:
 str_cmd_PRG:
 	db 'PRG',0
 str_cmdh_PRG:
-	db ' (?) Load a compiled program file (*.prg) into 0xCE00, and the execute it.',0
+	db ' (?) Load a compiled program file (*.prg) into 0xCE00, and the execute it.',13,0
 cmd_PRG:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1895,13 +1884,16 @@ cmd_PRG:
 		jmp .loop
 	.exitLoop:
 	; Verificar si hay más
-	
+	mov si, _BRFS_TRS_+510
+	xor bh, bh
+	cmp bh, [si]
+	jnz .msg_leermas
+	cmp bh, [si+1]
+	jnz .msg_leermas
 	
 	; Transfer control
 	call 0:ProgramSpace
-	
 	jmp .cmdEndG
-	
 	
 	.msg_leermas:
 	xor bh, bh
@@ -1926,6 +1918,10 @@ cmd_PRG:
 	call _BRFS_ReadSector
 	jmp .starti2
 	
+	.unreadable:
+	mov si, _str_cc_unreadable
+	call PrintStringLn
+	jmp .cmdEndG
 	.cmdEndB:
 	mov si, _str_cc_unkPath
 	call PrintStringLn
@@ -1937,7 +1933,7 @@ cmd_PRG:
 str_cmd_PRT:
 	db 'PRT',0
 str_cmdh_PRT:
-	db ' (?) Print a string literal. Faster than PRINT from BASIC.',0
+	db ' (?) Print a string literal. Faster than PRINT from BASIC.',13,0
 cmd_PRT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -1969,7 +1965,7 @@ cmd_PRT:
 str_cmd_REM:
 	db 'REM',0
 str_cmdh_REM:
-	db ' (?) Works as a comment for command files.',0
+	db ' (?) Works as a comment for command files.',13,0
 cmd_REM:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -2001,7 +1997,7 @@ cmd_REM:
 str_cmd_RTX:
 	db 'RTX',0
 str_cmdh_RTX:
-	db ' (?) Read a text file and print it on screen.',0
+	db ' (?) Read a text file and print it on screen.',13,0
 cmd_RTX:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -2064,9 +2060,7 @@ cmd_RTX:
 		cmp al, 32 ; SPACE
 		jb .next
 		
-		mov ah, 0x0e
-		xor bx, bx ; PAGE
-		int 10h
+		call PrintChar
 		
 		.next:
 		inc si
@@ -2128,7 +2122,7 @@ cmd_RTX:
 str_cmd_RUN:
 	db 'RUN',0
 str_cmdh_RUN:
-	db ' (?) Run the program in memory.',0
+	db ' (?) Run the program in memory.',13,0
 cmd_RUN:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -2165,7 +2159,7 @@ str_cmdh_SRECT:
 	db '     SRECT top,left,bottom,right',13
 	db '   Ex:',13
 	db '     > SRECT 00,00,18,4F',13
-	db '     > SRECT 03,05,15,49',0
+	db '     > SRECT 03,05,15,49',13,0
 cmd_SRECT:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -2337,7 +2331,7 @@ cmd_SRECT:
 str_cmd_SYS:
 	db 'SYS',0
 str_cmdh_SYS:
-	db ' (?) Transfer the control to a specific position (4 hex-digit) of the memory. Example: SYS DA00. Only uppercase.',0
+	db ' (?) Transfer the control to a specific position (4 hex-digit) of the memory. Example: SYS DA00. Only uppercase.',13,0
 cmd_SYS:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -2357,9 +2351,6 @@ cmd_SYS:
 	mov bh, byte 0
 	cmp bh, [_InputBuffer+4]
 	jz .cmdEndG
-	mov bh, 13 ; .cmd files
-	cmp bh, [_InputBuffer+4]
-	jz .cmdEndG
 	
 	; Transfer control
 	;call 0:ProgramSpace
@@ -2377,7 +2368,7 @@ cmd_SYS:
 str_cmd_VER:
 	db 'VER',0
 str_cmdh_VER:
-	db ' (?) Watch information about the current version of FreeBASIC.',0
+	db ' (?) Watch information about the current version of FreeBASIC.',13,0
 cmd_VER:
 	; Verificacion rutinaria
 	cmp bh, byte 0 ; Si el comando introducido no era OFF, terminar
@@ -2411,7 +2402,9 @@ str_cmd_WTX:
 str_cmdh_WTX:
 	db ' (?) Write from the console prompt to a specified text file (Argument 1).',13
 	db '     Ex.: WTX example.txt',13
-	db '     Press CTRL+Z and hit ENTER to finish writing.',0
+	db '     Press CTRL+Z and hit ENTER to finish writing.',13
+	db 13
+	db '  *  WARNING: You cannot use backspace. Every char you type is stored and saved.',13,0
 cmd_WTX:
 	; Verificacion rutinaria
 	cmp bh, byte 0
@@ -2475,8 +2468,7 @@ cmd_WTX:
 		jb .spChar
 		
 		.esc:
-		mov ah, 0x0e
-		int 10h
+		call PrintChar
 		
 		jmp .store
 		
@@ -2489,18 +2481,20 @@ cmd_WTX:
 		; END WRITTING
 		mov bx, word [_FreeSector]
 		call _BRFS_WriteSector
+		call PrintLn
 		jmp .cmdEndG
 		
 		.spChar:
 		mov [si], al
 		mov byte [._p], al
 		mov bl, al
-		mov ah, 0x0e
+		
 		mov al, byte '^'
-		int 10h
+		call PrintChar
+		
 		add bl, 65
 		mov al, bl
-		int 10h
+		call PrintChar
 		jmp .next
 		
 		.store:
@@ -2517,6 +2511,7 @@ cmd_WTX:
 	cmp byte [_BRFS_TRS_], byte 0
 	jnz .FF
 	
+	mov si, _BRFS_TWS_+510
 	mov byte [si], 0x00
 	mov byte [si+1], 0x01
 	jmp .ww
@@ -2524,6 +2519,7 @@ cmd_WTX:
 	.FF:
 	call _BRFS_GetFreeSector
 	; Check error
+	mov si, _BRFS_TWS_+510
 	mov bl, byte [_FreeSector]
 	mov byte [si], bl
 	mov bl, byte [_FreeSector+1]
@@ -2624,7 +2620,7 @@ __more:
 
 ; Strings
 _str_cc_OFF:
-	db 13,'> Press ENTER to turn off the computer, or any other key to cancel.', 0
+	db '> Press ENTER to turn off the computer, or any other key to cancel.', 0
 _str_cc_OFF2:
 	db '> Shutting down...',0
 _str_cc_unkPath:
@@ -2640,7 +2636,7 @@ _str_cc_version:
 	db '   version 0.5          [bruno@retronomicon.gq]',13
 	db 13
 	db ' > BASIC Core           by Angel Ruiz Fernandez',13
-	db '   version 0.1          [aruizfernandez05@gmail.com]'
+	db '   version 0.1          [aruizfernandez05@gmail.com]',13
 	db 0
 _str_cc_unreadable:
 	db 'Unreadable disk. Use FORMAT command',0

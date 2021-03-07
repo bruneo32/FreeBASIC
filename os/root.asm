@@ -26,14 +26,14 @@ x0029:
 x002a:
 	db 'COLOR 1F',13
 	db 'PRE',13
-	db 'SRECT 03,05,15,49',13
+	db 'SRECT 03,05,15,4A',13
 	db 'FRECT 00,00,19,4F,30',13
 	db 'CLS',13
 	db 'PRT',13
 	db 'PRT                     **** COMMODORE 64 BASIC V2 ****',13
 	db 'PRT                  64K RAM SYSTEM  38911 BASIC BYTES FREE',13
 	db 'PRT READY.',13
-	db 'ARECT 03,05,06,49,1B'
+	db 'ARECT 03,05,06,4A,1B'
 	
 	times 510-($-x002a) db 0
 	dw 0 ; Puntero
@@ -84,7 +84,7 @@ x0030:
 x0031:
 	db 'REM This command file is executed on the system start.',13
 	db 13
-	db 'COM default.tmp',13
+	db 'CMD default.tmp',13
 	
 	times 510-($-x0031) db 0
 	dw 0 ; Puntero

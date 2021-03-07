@@ -1,12 +1,9 @@
 PrintLn:
 	pusha
-	mov ah, 0x0e
-	xor bx, bx
 	mov al, 0x0d
-	int 0x10
+	call PrintChar
 	mov al, 0x0a
-	int 0x10
-	call _ReflowCursor
+	call PrintChar
 	popa
 	ret
 
@@ -26,11 +23,10 @@ PrintString:
 		
 		.crlf:
 		mov al, 0x0a ; LF
-		int 0x10
+		call PrintChar
 		.print:
 		mov al, [si]
-		xor bx, bx
-		int 0x10
+		call PrintChar
 		
 		.next:
 		call _ReflowCursor
@@ -43,6 +39,47 @@ PrintStringLn:
 	; SI: String adress
 	call PrintString
 	call PrintLn
+	ret
+PrintChar:
+	; AL - Char
+	pusha
+	
+	cmp al, byte 0x0d
+	jz .CR
+	cmp al, byte 0x0a
+	jz .LF
+	
+	; Print
+	xor bh,bh
+	xor ch,ch
+	mov cl, byte 1
+	mov ah, 0x0a
+	int 10h
+	
+	; Inc Cursor
+	mov bx, 0x0001
+	call MovCursorRel
+	
+	jmp .end
+	
+	.CR:
+	call GetCursorPos
+	push dx
+	mov dh, [_CursorRow]
+	xor dl,dl
+	
+	call SetCursorPos
+	
+	pop dx
+	jmp .end
+	
+	.LF:
+	mov bx, 0x0100
+	call MovCursorRel
+	
+	.end:
+	call _ReflowCursor
+	popa
 	ret
 
 _ReflowCursor:
