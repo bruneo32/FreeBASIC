@@ -4,14 +4,13 @@
 - Delete left zeroes & empty lines, make padding
 
 # TODO: System
-- Problema X
-- MORE para HELP?
 - Comandos de archivos
 - Comando FORMAT
 - Apagado ACPI
 - BRFS de 32 bits
 
 # Done
+- Problema X
 - autorun.cmd
 - TEMPLATES
 - Borrar linea en BASIC
