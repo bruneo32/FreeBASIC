@@ -8,6 +8,7 @@
 - Comando FORMAT
 - Apagado ACPI
 - BRFS de 32 bits
+- Custom COMs
 
 # Done
 - Problema X
