@@ -11,6 +11,7 @@
 - Custom COMs
 
 # Done
+- 16 colors for background
 - Problema X
 - autorun.cmd
 - TEMPLATES
