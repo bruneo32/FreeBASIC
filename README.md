@@ -1,6 +1,8 @@
 [![version](https://img.shields.io/badge/version-0.1-tomato.svg)](https://semver.org)
 [![version](https://img.shields.io/badge/license-GPL3-orangered.svg)](https://semver.org)
+
 Nowadays, it have many errors and problems. Please wait for version >0.5 to clone this repo.
+<br>
 
 # FreeBASIC
 Modern implementantion of a BASIC operating system in Assembly and C.
