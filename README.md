@@ -1,3 +1,6 @@
+[![version](https://img.shields.io/badge/version-0.1-tomato.svg)](https://semver.org)
+[![version](https://img.shields.io/badge/license-GPL3-orangered.svg)](https://semver.org)
+
 # FreeBASIC
 Modern implementantion of a BASIC operating system in Assembly and C.
 
