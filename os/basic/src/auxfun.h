@@ -14,6 +14,10 @@ size_t strspn(const char *str, const char *set);
 size_t strlen(const char *str);
 int atoin(const char *str, size_t len);
 const char *strpbrk(const char *str, const char *set);
+int strncmp(const char *str1, const char *str2, size_t count);
+void* memset(void *ptr, char value, size_t size);
+const char* strstr(char *str1, const char *str2);
+const char* itoa(int num, char* str, int base);
 
 // KIT
 extern void PrintString(char*);
@@ -23,6 +27,8 @@ extern void GetPromptString();
 extern void ClearInputBuffer();
 extern void ExtendedStore(size_t, unsigned char);
 extern unsigned char ExtendedLoad(size_t);
+extern void _End();
+extern bool CheckEndKey();
 
 extern unsigned short *BasicProgramCounter;
 

@@ -72,3 +72,83 @@ const char *strpbrk(const char *str, const char *set) {
 	}
 	return NULL;
 }
+
+int strncmp(const char *str1, const char *str2, size_t count) {
+	int t = 0;
+	for (size_t i = 0; i < count; i++) {
+		t += str1[i] - str2[i];
+	}
+	return t;
+}
+
+void* memset(void *ptr, char value, size_t size) {
+	for (size_t i = 0; i < size; ++i)
+		((char*)ptr)[i] = value;
+
+	return ptr;
+}
+
+int compare(const char *X, const char *Y) {
+    while (*X && *Y)
+    {
+        if (*X != *Y)
+            return 0;
+        X++;
+        Y++;
+    }
+    return (*Y == '\0');
+}
+
+const char* strstr(char *str1, const char *str2) {
+	while (*str1 != '\0') {
+        if ((*str1 == *str2) && compare(str1, str2))
+            return str1;
+        str1++;
+    }
+    return NULL;
+}
+
+void swap(char *c1, char *c2) {
+	char t = *c1;
+	*c1 = *c2;
+	*c2 = t;
+}
+
+void reverse(char *str, int length) {
+    int start = 0;
+    int end = length -1;
+    while (start < end)
+    {
+        swap(str+start, str+end);
+        start++;
+        end--;
+    }
+}
+
+const char* itoa(int num, char* str, int base) {
+	int i = 0;
+    bool isNegative = false;
+  
+    if (num == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return str;
+    }
+    if (num < 0 && base == 10) {
+        isNegative = true;
+        num = -num;
+    }
+  
+    while (num != 0) {
+        int rem = num % base;
+        str[i++] = (rem > 9)? (rem-10) + 'a' : rem + '0';
+        num = num/base;
+    }
+  
+    if (isNegative)
+        str[i++] = '-';
+  
+    str[i] = '\0';
+    reverse(str, i);
+    return str;
+}

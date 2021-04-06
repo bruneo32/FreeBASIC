@@ -31,7 +31,4 @@ _interpret:
 kernarg:
 	dw 0x0000
 	
-_strxd:
-	db 'Hola xd',0
-	
 %include "src/kit.asm"

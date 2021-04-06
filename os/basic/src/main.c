@@ -1,12 +1,11 @@
 // main.c: interpreter main
-#include "aux.h"
+#include "auxfun.h"
 
 // ==================================== MAIN ====================================
 
 void sortProgram() {
 	char *base = (char*)programstr;
 	char *str = (char*)programstr;
-	const char *arg = (const char*)kernarg;
 
 	if (str[0] == '\0') return;
 	size_t idx = 0;
@@ -186,8 +185,89 @@ void list() {
 	*BasicProgramCounter = (unsigned short)(base + strlen(base));
 }
 
+void toUppercase() {
+	char *str = (char*)programstr;
+	while (*str) {
+		if (*str == 'a') *str = 'A';
+		if (*str == 'b') *str = 'A';
+		if (*str == 'c') *str = 'A';
+		if (*str == 'd') *str = 'A';
+		if (*str == 'e') *str = 'A';
+		if (*str == 'f') *str = 'A';
+		if (*str == 'g') *str = 'A';
+		if (*str == 'h') *str = 'A';
+		if (*str == 'i') *str = 'A';
+		if (*str == 'j') *str = 'A';
+		if (*str == 'k') *str = 'A';
+		if (*str == 'l') *str = 'A';
+		if (*str == 'm') *str = 'A';
+		if (*str == 'n') *str = 'A';
+		if (*str == 'o') *str = 'A';
+		if (*str == 'p') *str = 'A';
+		if (*str == 'q') *str = 'A';
+		if (*str == 'r') *str = 'A';
+		if (*str == 's') *str = 'A';
+		if (*str == 't') *str = 'A';
+		if (*str == 'u') *str = 'A';
+		if (*str == 'v') *str = 'A';
+		if (*str == 'w') *str = 'A';
+		if (*str == 'x') *str = 'A';
+		if (*str == 'y') *str = 'A';
+		if (*str == 'z') *str = 'A';
+		++str;
+	}
+}
+
 void interpret() {
 	sortProgram();
-	
-	PrintStringLn("apple sucks\r");
+	toUppercase();
+
+	char *str = (char*)programstr;
+
+	while (*str) {		
+		size_t numlen = strspn(str, "1234567890");
+		//size_t linen = atoin(str, numlen);
+		
+		if (CheckEndKey()) {
+			char msg[100] = "BREAK AT LINE ";	// next 21
+			strncpy(msg + 21, str, numlen);
+			msg[21 + numlen] = '\0';
+			PrintStringLn(msg);
+			_End();
+		}
+
+		char *inst = str + numlen + 1;
+		if (strncmp(inst, "PRINT", 5) == 0) {
+			char toprint[300];
+			const char *start = strchr(inst, '\"');
+			size_t size = strchr(start + 1, '\"') - start - 1;
+			memcpy(toprint, start + 1, size);
+			//toprint[size + 1] = '\r';
+			toprint[size] = '\0';
+			PrintStringLn(toprint);
+			memset(toprint, 0, 300);
+
+			str = (char*)strchr(str, '\r') + 1;
+		} else if (strncmp(inst, "INPUT", 5) == 0) {
+			GetPromptString();
+			str = (char*)strchr(str, '\r') + 1;
+		} else if (strncmp(inst, "GOTO", 4) == 0) {
+			char num[16];
+			char *arg = (char*)strpbrk(inst, "1234567890");
+			size_t arglen = strspn(arg, "1234567890");
+			strncpy(num, arg, arglen);
+			num[arglen] = '\0';
+			str = (char*)strstr((char*)programstr, num);
+		} else if (strncmp(inst, "END", 3) == 0) {
+			_End();
+		} else {
+			char msg[100] = "SYNTAX ERROR AT LINE ";	// next 21
+			strncpy(msg + 21, str, numlen);
+			msg[21 + numlen] = '\0';
+			PrintStringLn(msg);
+			_End();
+		}
+	}
+
+	_End();
 }

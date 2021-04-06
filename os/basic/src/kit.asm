@@ -82,3 +82,55 @@ ExtendedLoad:
 	; Return in AL
 	xor ah, ah
 	ret
+
+global _End
+_End:
+	jmp word [MainLoop]
+
+global miniChar
+MiniChar:
+	; Iniciar el ARG a 0
+	xor al, al
+
+	; Verificar si se pulsa alguna tecla (si no: .end)
+	mov ah, 01h
+	int 16h
+	jz .end
+
+	; Si se pulsa, obtener en AL
+	xor ah, ah
+	int 16h
+
+	.end:
+	; Devuelve el char en AL. Si es 0, no se ha pulsado ninguna tecla
+	ret
+
+global CheckEndKey
+CheckEndKey:
+	; Iniciar el ARG a 0
+	xor al, al
+
+	; Verificar si se pulsa alguna tecla (si no: .end)
+	mov ah, 01h
+	int 16h
+	jz .end
+
+	; Si se pulsa, obtener en AH:AL
+	xor ah, ah
+	int 16h
+
+	; END scancode= 4700
+
+	cmp al, byte 0
+	jnz .end
+	cmp ah, byte 0x47
+	jnz .end
+
+	; Return true
+	mov al, byte 1
+	ret
+
+	.end:
+	; Return false
+	xor al, al
+	ret
