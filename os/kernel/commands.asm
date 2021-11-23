@@ -2633,7 +2633,7 @@ _str_cc_version:
 	db ' FreeBASIC 0.5.1        published under GPL 3 license.',13
 	db 13
 	db ' > System               by Bruno Castro Garcia',13
-	db '   version 0.5          [bruno@retronomicon.gq]',13
+	db '   version 0.5          [bruneo32b@gmail.com]',13
 	db 13
 	db ' > BASIC Core           by Angel Ruiz Fernandez',13
 	db '   version 0.1          [aruizfernandez05@gmail.com]',13
